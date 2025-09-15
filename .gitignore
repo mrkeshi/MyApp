@@ -1,0 +1,69 @@
+# =========================
+# Django / Python
+# =========================
+__pycache__/
+*.py[cod]
+*.sqlite3
+*.db
+*.log
+*.pot
+*.pyc
+
+# Virtual environments
+venv/
+env/
+*.env
+.env.local
+.env.*
+
+# Django media/static
+media/
+staticfiles/
+static/
+
+# IDEs
+.idea/
+.vscode/
+*.swp
+
+# Migrations cache
+*/migrations/__pycache__/
+*/migrations/*.pyc
+*/migrations/*.pyo
+*/migrations/*.pot
+
+# =========================
+# Flutter / Dart
+# =========================
+# Build outputs
+build/
+.android/
+.ios/
+.flutter-plugins
+.flutter-plugins-dependencies
+.packages
+pubspec.lock
+
+# Generated files
+*.dart_tool/
+.dart_tool/
+.flutter-*
+.macos/
+linux/
+windows/
+web/
+coverage/
+
+# IDEs
+*.iml
+*.ipr
+*.iws
+.idea/
+.vscode/
+*.swp
+
+# =========================
+# OS / General
+# =========================
+.DS_Store
+Thumbs.db
