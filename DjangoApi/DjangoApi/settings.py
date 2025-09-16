@@ -41,7 +41,8 @@ INSTALLED_APPS = [
     'drf_spectacular',
     'drf_spectacular_sidecar',
     'Province',
-    'accounts'
+    'accounts',
+    'events'
 ]
 AUTH_USER_MODEL = "accounts.User"
 
@@ -160,7 +161,7 @@ SPECTACULAR_SETTINGS = {
 
     'TAGS': [
         {'name': 'Provinces', 'description': 'Provinces and geographical metadata'},
-        {'name': 'Cities', 'description': 'Cities, population, and coordinates'},
+        {'name': 'Events', 'description': 'Province events & reviews'},
         {'name': 'Attractions', 'description': 'Tourist and cultural attractions'},
         {'name': 'Routes', 'description': 'Suggested routes/tours with distance and duration'},
         {'name': 'Search', 'description': 'Combined search (text, radius, filters)'},
