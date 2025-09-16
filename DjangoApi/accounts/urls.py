@@ -1,6 +1,5 @@
 from django.urls import path
-from Province.views import CustomTokenRefreshView
-from .views import RequestCodeView, VerifyCodeView, MeView, ChangeProvinceView
+from .views import RequestCodeView, VerifyCodeView, MeView, ChangeProvinceView, CustomTokenRefreshView
 
 urlpatterns = [
     path("auth/request-code/", RequestCodeView.as_view(), name="auth-request-code"),

@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Province
+from .models import Province, ProvincePhoto
 
 class ProvinceSerializer(serializers.ModelSerializer):
     map_image = serializers.ImageField(read_only=True)
@@ -16,3 +16,10 @@ class ProvinceSerializer(serializers.ModelSerializer):
             "description",
             "map_image",
         ]
+
+class ProvincePhotoSerializer(serializers.ModelSerializer):
+    image = serializers.ImageField(read_only=True)
+
+    class Meta:
+        model = ProvincePhoto
+        fields = ("id", "image", "title", "order", "created_at")

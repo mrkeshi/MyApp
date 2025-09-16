@@ -9,6 +9,7 @@ from rest_framework.views import APIView
 from rest_framework.parsers import MultiPartParser, FormParser
 from rest_framework_simplejwt.tokens import RefreshToken
 from drf_spectacular.utils import extend_schema, OpenApiResponse
+from rest_framework_simplejwt.views import TokenRefreshView
 
 from .models import PhoneOTP
 from .serializers import RequestCodeSerializer, VerifyCodeSerializer, MeSerializer, ChangeProvinceSerializer
@@ -188,3 +189,8 @@ class ChangeProvinceView(APIView):
         user.save()
 
         return Response(MeSerializer(user, context={"request": request}).data, status=status.HTTP_200_OK)
+
+class CustomTokenRefreshView(TokenRefreshView):
+    @extend_schema(tags=["Auth"], summary="Refresh JWT token")
+    def post(self, request, *args, **kwargs):
+        return super().post(request, *args, **kwargs)

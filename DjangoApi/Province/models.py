@@ -21,3 +21,18 @@ class Province(models.Model):
 
     def __str__(self):
         return self.name_en
+
+class ProvincePhoto(models.Model):
+    province = models.ForeignKey(Province, on_delete=models.CASCADE, related_name="photos")
+    image = models.ImageField("Photo", upload_to=province_map_upload_path)
+    title = models.CharField("Title", max_length=150, blank=True, default="")
+    order = models.PositiveIntegerField("Order", default=0)
+    created_at = models.DateTimeField("Created at", auto_now_add=True)
+
+    class Meta:
+        ordering = ("order", "-created_at")
+        verbose_name = "Province Photo"
+        verbose_name_plural = "Province Photos"
+
+    def __str__(self):
+        return self.title or f"Photo #{self.pk} of {self.province.name_fa}"
