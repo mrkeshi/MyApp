@@ -37,6 +37,10 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'rest_framework',
+    'drf_spectacular',
+    'drf_spectacular_sidecar',
+    'Province'
 ]
 
 MIDDLEWARE = [
@@ -121,3 +125,67 @@ STATIC_URL = 'static/'
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+REST_FRAMEWORK = {
+    # YOUR SETTINGS
+    'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
+}
+SPECTACULAR_SETTINGS = {
+    'TITLE': 'Iran Geo & Tourism API',
+    'DESCRIPTION': (
+        'API for providing geographical data, tourist attractions, routes, and tourism information about Iran. '
+        'Designed for consumption in a Flutter (Android) application.'
+    ),
+    'VERSION': '1.0.0',
+    'SERVE_INCLUDE_SCHEMA': False,
+
+    'SERVERS': [
+        {'url': 'https://api.example.com', 'description': 'Production environment'},
+        {'url': 'https://staging.example.com', 'description': 'Staging environment'},
+        {'url': 'http://10.0.2.2:8000', 'description': 'Android Emulator (host machine)'},
+        {'url': 'http://127.0.0.1:8000', 'description': 'Local development (desktop)'},
+    ],
+
+    'TAGS': [
+        {'name': 'Provinces', 'description': 'Provinces and geographical metadata'},
+        {'name': 'Cities', 'description': 'Cities, population, and coordinates'},
+        {'name': 'Attractions', 'description': 'Tourist and cultural attractions'},
+        {'name': 'Routes', 'description': 'Suggested routes/tours with distance and duration'},
+        {'name': 'Search', 'description': 'Combined search (text, radius, filters)'},
+        {'name': 'Auth', 'description': 'User authentication and management'},
+    ],
+
+    'SECURITY': [
+        {'BearerAuth': []},
+    ],
+    'COMPONENTS': {
+        'securitySchemes': {
+            'BearerAuth': {
+                'type': 'http',
+                'scheme': 'bearer',
+                'bearerFormat': 'JWT',
+            }
+        }
+    },
+
+    'SCHEMA_PATH_PREFIX': r'/api/v1',
+    'POSTPROCESSING_HOOKS': [
+        'drf_spectacular.hooks.postprocess_schema_enums'
+    ],
+
+    'SWAGGER_UI_SETTINGS': {
+        'persistAuthorization': True,
+        'displayRequestDuration': True,
+        'docExpansion': 'none',
+    },
+    'REDOC_SETTINGS': {
+        'hideDownloadButton': True,
+    },
+
+    'CONTACT': {'name': 'Iran Geo & Tourism Team', 'email': 'api@example.com'},
+    'LICENSE': {'name': 'MIT License'},
+}
+
+MEDIA_URL = "/media/"
+MEDIA_ROOT = BASE_DIR / "media"
+API_BASE_URL="api/v1/"
