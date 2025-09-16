@@ -11,7 +11,7 @@ from rest_framework_simplejwt.tokens import RefreshToken
 from drf_spectacular.utils import extend_schema, OpenApiResponse
 
 from .models import PhoneOTP
-from .serializers import RequestCodeSerializer, VerifyCodeSerializer, MeSerializer
+from .serializers import RequestCodeSerializer, VerifyCodeSerializer, MeSerializer, ChangeProvinceSerializer
 
 User = get_user_model()
 
@@ -166,3 +166,25 @@ class MeView(generics.RetrieveUpdateAPIView):
     )
     def patch(self, request, *args, **kwargs):
         return super().patch(request, *args, **kwargs)
+class ChangeProvinceView(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+
+    @extend_schema(
+        tags=["Me"],
+        summary="Change my province",
+        request=ChangeProvinceSerializer,
+        responses={200: OpenApiResponse(response=MeSerializer, description="Province updated")}
+    )
+    def post(self, request):
+        ser = ChangeProvinceSerializer(data=request.data)
+        ser.is_valid(raise_exception=True)
+        province_id = ser.validated_data["province_id"]
+
+        from Province.models import Province
+        province = Province.objects.get(pk=province_id)
+
+        user = request.user
+        user.province = province
+        user.save()
+
+        return Response(MeSerializer(user, context={"request": request}).data, status=status.HTTP_200_OK)

@@ -53,3 +53,15 @@ class MeSerializer(serializers.ModelSerializer):
         model = User
         fields = ("id", "username", "phone_number", "first_name", "last_name", "profile_image", "province", "province_detail")
         read_only_fields = ("id", "username", "phone_number")
+
+
+class ChangeProvinceSerializer(serializers.Serializer):
+    province_id = serializers.IntegerField()
+
+    def validate_province_id(self, value):
+        from Province.models import Province
+        try:
+            Province.objects.get(pk=value)
+        except Province.DoesNotExist:
+            raise serializers.ValidationError("Invalid province id")
+        return value
