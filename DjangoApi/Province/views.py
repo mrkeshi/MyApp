@@ -1,6 +1,9 @@
 from django.shortcuts import render
 from rest_framework import viewsets, mixins
 from drf_spectacular.utils import extend_schema, OpenApiResponse
+from rest_framework.permissions import IsAuthenticated
+from rest_framework_simplejwt.views import TokenRefreshView
+
 from .models import Province
 from .serializers import ProvinceSerializer
 
@@ -19,7 +22,7 @@ class ProvinceViewSet(mixins.ListModelMixin,
     """
     queryset = Province.objects.all()
     serializer_class = ProvinceSerializer
-
+    permission_classes = [IsAuthenticated]
     @extend_schema(
         tags=["Provinces"],
         summary="Retrieve a province",
@@ -28,3 +31,7 @@ class ProvinceViewSet(mixins.ListModelMixin,
     )
     def retrieve(self, request, *args, **kwargs):
         return super().retrieve(request, *args, **kwargs)
+class CustomTokenRefreshView(TokenRefreshView):
+    @extend_schema(tags=["Auth"], summary="Refresh JWT token")
+    def post(self, request, *args, **kwargs):
+        return super().post(request, *args, **kwargs)
