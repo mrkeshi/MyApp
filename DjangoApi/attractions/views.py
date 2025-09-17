@@ -1,13 +1,14 @@
 from rest_framework import viewsets, mixins, permissions, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
-from django.db.models import Avg, Count
+from django.db.models import Avg, Count, Q
 from drf_spectacular.utils import extend_schema, OpenApiResponse
 from .models import Attraction, AttractionReview
 from .serializers import (
-    AttractionSerializer, AttractionPhotoSerializer,
+    AttractionSerializer, AttractionPhotoSerializer, AttractionSearchResultSerializer,
     AttractionReviewSerializer, AttractionReviewCreateSerializer
 )
+
 @extend_schema(
     tags=["Attractions"],
     summary="List attractions (user's province)",
@@ -43,7 +44,7 @@ class AttractionViewSet(mixins.ListModelMixin,
     )
     @action(detail=True, methods=["get"], url_path="photos", permission_classes=[permissions.IsAuthenticated])
     def photos(self, request, pk=None):
-        attraction = self.get_object()  # همین فیلتر استان را رعایت می‌کند
+        attraction = self.get_object()
         ser = AttractionPhotoSerializer(attraction.photos.all(), many=True, context={"request": request})
         return Response(ser.data)
 
@@ -87,3 +88,27 @@ class AttractionViewSet(mixins.ListModelMixin,
             defaults={"rating": ser.validated_data["rating"], "comment": ser.validated_data.get("comment", "")}
         )
         return Response(AttractionReviewSerializer(obj, context={"request": request}).data, status=status.HTTP_200_OK)
+
+    @extend_schema(
+        tags=["Attractions"],
+        summary="Search attractions",
+        description="Search by title/short_description/description/venue. Respects user's province filter.",
+        responses={200: OpenApiResponse(response=AttractionSearchResultSerializer(many=True), description="Search results")},
+    )
+    @action(detail=False, methods=["get"], url_path="search", permission_classes=[permissions.IsAuthenticated])
+    def search(self, request):
+        q = (request.query_params.get("q") or "").strip()
+        qs = self.get_queryset().annotate(average_rating=Avg("reviews__rating"))
+        if q:
+            qs = qs.filter(
+                Q(title__icontains=q) |
+                Q(short_description__icontains=q) |
+                Q(description__icontains=q) |
+                Q(venue__icontains=q)
+            )
+        page = self.paginate_queryset(qs)
+        if page is not None:
+            ser = AttractionSearchResultSerializer(page, many=True, context={"request": request})
+            return self.get_paginated_response(ser.data)
+        ser = AttractionSearchResultSerializer(qs, many=True, context={"request": request})
+        return Response(ser.data)

@@ -44,3 +44,31 @@ class AttractionReviewSerializer(serializers.ModelSerializer):
 class AttractionReviewCreateSerializer(serializers.Serializer):
     rating = serializers.IntegerField(min_value=1, max_value=5)
     comment = serializers.CharField(allow_blank=True, required=False)
+
+class AttractionSearchResultSerializer(serializers.ModelSerializer):
+    cover_image_url = serializers.SerializerMethodField()
+    cover_image_name = serializers.SerializerMethodField()
+    average_rating = serializers.FloatField(read_only=True)
+
+    class Meta:
+        model = Attraction
+        fields = (
+            "id",
+            "title",
+            "short_description",
+            "cover_image_url",
+            "cover_image_name",
+            "average_rating",
+        )
+
+    def get_cover_image_url(self, obj):
+        try:
+            return obj.cover_image.url if obj.cover_image else None
+        except Exception:
+            return None
+
+    def get_cover_image_name(self, obj):
+        try:
+            return obj.cover_image.name.split("/")[-1] if obj.cover_image and obj.cover_image.name else None
+        except Exception:
+            return None
