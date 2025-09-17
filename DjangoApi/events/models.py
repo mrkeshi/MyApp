@@ -32,7 +32,7 @@ class Event(models.Model):
 class EventReview(models.Model):
     event = models.ForeignKey(Event, on_delete=models.CASCADE, related_name="reviews")
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="event_reviews")
-    rating = models.PositiveSmallIntegerField()  # 1..5
+    rating = models.PositiveSmallIntegerField()
     comment = models.TextField(blank=True, default="")
     created_at = models.DateTimeField(auto_now_add=True)
 

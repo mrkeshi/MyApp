@@ -32,6 +32,7 @@ urlpatterns = [
     path(f'{base_url}', include('accounts.urls')),
     path(f'{base_url}', include('events.urls')),
     path(f'{base_url}', include('attractions.urls')),
+    path(f'{base_url}', include('bookmarks.urls')),
 ]
 
 urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
