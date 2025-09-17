@@ -1,9 +1,5 @@
-from django.shortcuts import render
-
-# Create your views here.
 from rest_framework import viewsets, mixins, permissions, status
 from rest_framework.decorators import action
-from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from django.db.models import Avg, Count
 from drf_spectacular.utils import extend_schema, OpenApiResponse
@@ -12,30 +8,37 @@ from .serializers import EventSerializer, EventReviewSerializer, EventReviewCrea
 
 @extend_schema(
     tags=["Events"],
-    summary="List events",
-    description="List all province events. One event per province.",
+    summary="List events (user's province)",
+    description="Returns events only for the authenticated user's province. Staff users see all.",
     responses={200: OpenApiResponse(response=EventSerializer(many=True), description="Event list")}
 )
 class EventViewSet(mixins.ListModelMixin,
                    mixins.RetrieveModelMixin,
                    viewsets.GenericViewSet):
-    queryset = Event.objects.all()
     serializer_class = EventSerializer
     permission_classes = [permissions.IsAuthenticated]
 
     def get_queryset(self):
-        qs = super().get_queryset().annotate(
+        qs = Event.objects.all().annotate(
             average_rating=Avg("reviews__rating"),
             reviews_count=Count("reviews"),
         )
-        province_id = self.request.query_params.get("province_id")
-        if province_id:
-            qs = qs.filter(province_id=province_id)
-        return qs
+        user = self.request.user
+
+        if user.is_staff or user.is_superuser:
+            province_id = self.request.query_params.get("province_id")
+            if province_id:
+                qs = qs.filter(province_id=province_id)
+            return qs
+
+        if getattr(user, "province_id", None):
+            return qs.filter(province_id=user.province_id)
+
+        return qs.none()
 
     @extend_schema(
         tags=["Events"],
-        summary="Retrieve event",
+        summary="Retrieve event (user's province only)",
         responses={200: EventSerializer}
     )
     def retrieve(self, request, *args, **kwargs):
@@ -66,7 +69,7 @@ class EventViewSet(mixins.ListModelMixin,
         ser.is_valid(raise_exception=True)
         rating = ser.validated_data["rating"]
         comment = ser.validated_data.get("comment", "")
-        obj, created = EventReview.objects.update_or_create(
+        obj, _ = EventReview.objects.update_or_create(
             event=event, user=request.user,
             defaults={"rating": rating, "comment": comment}
         )

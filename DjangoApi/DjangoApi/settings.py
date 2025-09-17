@@ -42,7 +42,8 @@ INSTALLED_APPS = [
     'drf_spectacular_sidecar',
     'Province',
     'accounts',
-    'events'
+    'events',
+    'attractions'
 ]
 AUTH_USER_MODEL = "accounts.User"
 
