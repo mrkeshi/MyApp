@@ -24,7 +24,7 @@ class VerifyCodeSerializer(serializers.Serializer):
     phone_number = serializers.CharField(max_length=20)
     code = serializers.CharField(max_length=6)
 
-    province_id = serializers.IntegerField(required=False)
+
 
     def validate(self, data):
         phone = data["phone_number"].strip().replace(" ","").replace("-","")

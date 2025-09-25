@@ -3,7 +3,6 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import '../shared/styles/colors.dart';
 
-
 const String kThemeKey = 'selected_theme';
 
 enum AppThemeType { yellow, blue, red }
@@ -28,7 +27,6 @@ class AppTheme {
     final prefs = await SharedPreferences.getInstance();
     prefs.setString(kThemeKey, theme.name);
   }
-
 
   static ThemeData getTheme(AppThemeType type) {
     Color primary;
@@ -76,10 +74,47 @@ class AppTheme {
           fontWeight: FontWeight.w300,
           fontSize: 14,
         ),
+
         titleMedium: TextStyle(
-          fontFamily: 'jahan',
+          fontFamily: 'Customy',
           fontSize: 14,
         ),
+        headlineLarge: TextStyle(
+          fontFamily: 'Customy',
+          fontWeight: FontWeight.w700,
+          fontSize: 32,
+        ),
+        headlineMedium: TextStyle(
+          fontFamily: 'Customy',
+          fontWeight: FontWeight.w500,
+          fontSize: 20,
+        ),
+        headlineSmall: TextStyle(
+          fontFamily: 'Customy',
+          fontWeight: FontWeight.w400,
+          fontSize: 18,
+        ),
+        titleSmall: TextStyle(
+          fontFamily: 'Customy',
+          fontWeight: FontWeight.w300,
+          fontSize: 14,
+        ),
+        labelLarge: TextStyle(
+          fontFamily: 'Customy',
+          fontWeight: FontWeight.w500,
+          fontSize: 16,
+        ),
+        bodySmall: TextStyle(
+          fontFamily: 'Customy',
+          fontWeight: FontWeight.w300,
+          fontSize: 12,
+        ),
+        labelSmall: TextStyle(
+          fontFamily: 'Customy', 
+          fontWeight: FontWeight.w200,
+          fontSize: 10,
+        ),
+
       ),
     );
   }
