@@ -43,8 +43,9 @@ class _SplashScreenState extends State<SplashScreen>
       case AppThemeType.red:
         return AppColors.redPrimary;
       case AppThemeType.blue:
-      default:
         return AppColors.bluePrimary;
+      default:
+        return AppColors.yellowPrimary;
     }
   }
 
@@ -107,7 +108,7 @@ class _SplashScreenState extends State<SplashScreen>
       if (token != null) {
         Navigator.pushReplacementNamed(context, '/home');
       } else {
-        Navigator.pushReplacementNamed(context, '/login');
+        Navigator.pushReplacementNamed(context, '/welcome');
       }
     });
   }
