@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:aria/shared/styles/colors.dart';
 
+import '../../../../shared/widgets/primary_button.dart';
+
 class OnboardingScreen extends StatelessWidget {
   const OnboardingScreen({super.key});
 
@@ -63,22 +65,9 @@ class OnboardingScreen extends StatelessWidget {
                     SizedBox(
                       width: double.infinity,
                       height: 52,
-                      child: ElevatedButton(
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: primary,
-                          foregroundColor: Colors.white,
-                          elevation: 0,
-                          shape: const StadiumBorder(),
-                        ),
+                      child:PrimaryButton(
+                        text: 'ثبت نام',
                         onPressed: () => Navigator.pushNamed(context, '/login'),
-                        child: Text(
-                          'ثبت نام',
-                          style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                            fontFamily: 'customy',
-                            color: Colors.white,
-                            fontWeight: FontWeight.w400,
-                          ),
-                        ),
                       ),
                     ),
                     const SizedBox(height: 16),
