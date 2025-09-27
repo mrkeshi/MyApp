@@ -4,7 +4,7 @@ class AppColors {
   static const Color yellowPrimary   = Color(0xFFF9C907);
   static const Color bluePrimary     = Color(0xFF079CF9);
   static const Color redPrimary      = Color(0xFFF90727);
-
+  static const primaryColor = yellowPrimary;
   static const Color menuBackground  = Color(0xFF202529);
   static const Color iconColor       = Color(0xFF6B6B6B);
 
