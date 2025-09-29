@@ -15,9 +15,9 @@ class RequestCodeSerializer(serializers.Serializer):
         v = v.strip()
         v = v.replace(" ", "").replace("-", "")
         if not v.startswith("+") and not v.isdigit():
-            raise serializers.ValidationError("Invalid phone number")
+            raise serializers.ValidationError("شماره تلفن نامعتبر است")
         if len(v.replace("+","")) < 8:
-            raise serializers.ValidationError("Phone number too short")
+            raise serializers.ValidationError("شماره تلفن کوتاه است.")
         return v
 
 class VerifyCodeSerializer(serializers.Serializer):
@@ -31,12 +31,12 @@ class VerifyCodeSerializer(serializers.Serializer):
         code = data["code"].strip()
         otp_qs = PhoneOTP.objects.filter(phone_number=phone, is_used=False).order_by("-created_at")
         if not otp_qs.exists():
-            raise serializers.ValidationError({"code": "No code requested or already used."})
+            raise serializers.ValidationError({"code": "هیچ کدی درخواست نشده یا قبلاً استفاده نشده است."})
         otp = otp_qs.first()
         if otp.is_expired():
-            raise serializers.ValidationError({"code": "Code expired."})
+            raise serializers.ValidationError({"code": "کد به اتمام رسیده هست."})
         if otp.code != code:
-            raise serializers.ValidationError({"code": "Invalid code."})
+            raise serializers.ValidationError({"code": "کد نامتعتبر هست"})
         data["otp_obj"] = otp
         return data
 

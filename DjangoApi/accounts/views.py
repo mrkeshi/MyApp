@@ -35,6 +35,29 @@ def _unique_username_from_phone(phone):
     request=RequestCodeSerializer,
     responses={200: OpenApiResponse(response=None, description="Code requested")},
 )
+def _generate_code():
+    return f"{random.randint(100000, 999999)}"
+
+def _unique_username_from_phone(phone):
+    base = "user_" + phone.replace("+", "")[-8:]
+    username = base
+    i = 1
+    while User.objects.filter(username=username).exists():
+        i += 1
+        username = f"{base}_{i}"
+    return username
+
+def _calculate_resend_window(request_count):
+    base_window = 60
+    return base_window * (2 ** (request_count - 1))
+
+@extend_schema(
+    tags=["Auth"],
+    summary="Request OTP code",
+    description="Send OTP to the given phone (prints in console for now).",
+    request=RequestCodeSerializer,
+    responses={200: OpenApiResponse(response=None, description="Code requested")},
+)
 class RequestCodeView(APIView):
     permission_classes = [permissions.AllowAny]
 
@@ -44,57 +67,60 @@ class RequestCodeView(APIView):
         phone = ser.validated_data["phone_number"].replace(" ", "").replace("-", "")
         now = timezone.now()
 
-        resend_window = settings.OTP_SETTINGS["RESEND_WINDOW_SECONDS"]
-        code_ttl = settings.OTP_SETTINGS["CODE_TTL_SECONDS"]
+        is_resend = ser.validated_data.get("is_resend", False)
 
-        recent = PhoneOTP.objects.filter(
-            phone_number=phone,
-            created_at__gt=now - timedelta(seconds=resend_window)
-        ).order_by("-created_at").first()
+        if is_resend:
+            recent = PhoneOTP.objects.filter(
+                phone_number=phone,
+                is_used=False,
+                expires_at__gt=now
+            ).order_by("-created_at").first()
 
-        if recent:
-            retry_at = recent.created_at + timedelta(seconds=resend_window)
-            retry_in = max(0, int((retry_at - now).total_seconds()))
-            headers = {"Retry-After": str(retry_in)}
-            return Response(
-                {
-                    "detail": "Too many requests. Please wait before requesting a new code.",
-                    "next_allowed_at": retry_at.isoformat(),
-                    "retry_in_seconds": retry_in,
-                },
-                status=status.HTTP_429_TOO_MANY_REQUESTS,
-                headers=headers
-            )
+            if recent:
+                request_count = PhoneOTP.objects.filter(
+                    phone_number=phone,
+                    created_at__gt=now - timedelta(days=1)
+                ).count()
 
-        active_otp = PhoneOTP.objects.filter(
-            phone_number=phone, is_used=False, expires_at__gt=now
-        ).order_by("-created_at").first()
+                resend_window = _calculate_resend_window(request_count)
+                retry_at = recent.created_at + timedelta(seconds=resend_window)
+                retry_in = max(0, int((retry_at - now).total_seconds()))
 
-        if active_otp:
-            print(f"[OTP-REUSE] phone={phone} code={active_otp.code} expires_at={active_otp.expires_at.isoformat()}")
-            return Response(
-                {
-                    "detail": "Existing OTP is still valid.",
-                    "expires_at": active_otp.expires_at.isoformat()
-                },
-                status=status.HTTP_200_OK
-            )
+                remaining_minutes = retry_in // 60
+                remaining_seconds = retry_in % 60
+
+                retry_message = f"لطفاً {remaining_minutes} دقیقه و {remaining_seconds} ثانیه صبر کنید." if remaining_minutes > 0 else f"لطفاً {remaining_seconds} ثانیه صبر کنید."
+
+                headers = {"Retry-After": str(retry_in)}
+                return Response(
+                    {
+                        "detail": retry_message,
+                        "next_allowed_at": retry_at.isoformat(),
+                        "retry_in_seconds": retry_in,
+                    },
+                    status=status.HTTP_429_TOO_MANY_REQUESTS,
+                    headers=headers
+                )
+
+            PhoneOTP.objects.filter(phone_number=phone).delete()
 
         code = _generate_code()
+        code_ttl = settings.OTP_SETTINGS["CODE_TTL_SECONDS"]
         expires_at = now + timedelta(seconds=code_ttl)
         PhoneOTP.objects.create(phone_number=phone, code=code, expires_at=expires_at)
 
-        print(f"[OTP] phone={phone} code={code} expires_at={expires_at.isoformat()}")
-
-        next_allowed_at = now + timedelta(seconds=resend_window)
+        next_allowed_at = now + timedelta(seconds=60)
         return Response(
             {
-                "detail": "OTP generated. Check console in dev.",
+                "detail": "کد OTP ایجاد شد.",
                 "expires_at": expires_at.isoformat(),
                 "next_allowed_at": next_allowed_at.isoformat(),
+                "retry_in_seconds": 60,
             },
             status=status.HTTP_200_OK
         )
+
+
 
 @extend_schema(
     tags=["Auth"],
@@ -121,13 +147,13 @@ class VerifyCodeView(APIView):
         fn = ser.validated_data.get("first_name")
         ln = ser.validated_data.get("last_name")
         province_id = ser.validated_data.get("province_id")
-        if fn is not None:
+        if fn:
             user.first_name = fn
-        if ln is not None:
+        if ln:
             user.last_name = ln
-        if province_id is not None:
-            from Province.models import Province
+        if province_id:
             try:
+                from Province.models import Province
                 user.province = Province.objects.get(pk=province_id)
             except Province.DoesNotExist:
                 pass

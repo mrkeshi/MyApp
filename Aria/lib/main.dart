@@ -1,10 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+
 import 'package:aria/app/theme.dart';
-import 'app/router.dart';
+import 'package:aria/app/di.dart';
+import 'package:aria/app/router.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   final type = await AppTheme.loadTheme();
+
   runApp(MyApp(initialType: type));
 }
 
@@ -14,12 +18,15 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'My App',
-      theme: AppTheme.getTheme(initialType),
-      initialRoute: '/',
-      onGenerateRoute: AppRouter.generateRoute,
-      debugShowCheckedModeBanner: false,
+    return MultiProvider(
+      providers: AppDI.providers(),
+      child: MaterialApp(
+        title: 'My App',
+        theme: AppTheme.getTheme(initialType),
+        initialRoute: '/',
+        onGenerateRoute: AppRouter.generateRoute,
+        debugShowCheckedModeBanner: false,
+      ),
     );
   }
 }

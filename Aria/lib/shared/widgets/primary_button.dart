@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 class PrimaryButton extends StatelessWidget {
   final String text;
-  final VoidCallback onPressed;
+  final VoidCallback? onPressed;
   final Color? backgroundColor;
   final Color? textColor;
   final double height;
@@ -16,7 +16,7 @@ class PrimaryButton extends StatelessWidget {
     this.backgroundColor,
     this.textColor,
     this.height = 52,
-    this.borderRadius = 30,
+    this.borderRadius = 20,
     this.fontWeight = FontWeight.w500,
   });
 
@@ -30,7 +30,7 @@ class PrimaryButton extends StatelessWidget {
       height: height,
       child: ElevatedButton(
         style: ElevatedButton.styleFrom(
-          backgroundColor: bgColor,
+          backgroundColor: onPressed == null ? Colors.grey : bgColor,
           foregroundColor: fgColor,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(borderRadius),
@@ -41,6 +41,7 @@ class PrimaryButton extends StatelessWidget {
         child: Text(
           text,
           style: Theme.of(context).textTheme.labelLarge?.copyWith(
+            fontSize: 15,
             color: fgColor,
             fontWeight: fontWeight,
             fontFamily: 'customy',
