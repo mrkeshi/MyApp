@@ -20,7 +20,6 @@ class PersianDigitsFormatter extends TextInputFormatter {
       TextEditingValue newValue,
       ) {
     final faText = _toFa(newValue.text);
-    // کرسر را تا جای ممکن نگه می‌داریم
     final base = faText.length;
     return TextEditingValue(
       text: faText,

@@ -142,14 +142,17 @@ class _LoginPageState extends State<LoginPage> {
                               } else if (context.mounted && c.errorText != null) {
                                 ScaffoldMessenger.of(context).showSnackBar(
                                   SnackBar(
-                                    content: Text(
-                                      c.errorText!,
-                                      style: TextStyle(
-                                        color: Colors.white,
-                                        fontWeight: FontWeight.w500,
-                                        fontSize: 14,
+                                    content: Directionality(
+                                      textDirection: TextDirection.rtl,
+                                      child: Text(
+                                        c.errorText!,
+                                        style: TextStyle(
+                                          color: Colors.white,
+                                          fontWeight: FontWeight.w500,
+                                          fontSize: 14,
+                                        ),
+                                        textAlign: TextAlign.start,
                                       ),
-                                      textAlign: TextAlign.right,
                                     ),
                                     backgroundColor: AppColors.redPrimary,
                                     duration: const Duration(seconds: 3),

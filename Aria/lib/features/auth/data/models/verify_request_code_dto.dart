@@ -1,13 +1,13 @@
 // lib/features/auth/data/models/request_code_dto.dart
 
-class ResendRequestCodeDto {
+class VerifyRequestCodeDto {
   final String phoneNumber;
-
-  const ResendRequestCodeDto({required this.phoneNumber});
+  final String code;
+  const VerifyRequestCodeDto({required this.phoneNumber,required this.code});
 
   Map<String, dynamic> toJson() => {
     'phone_number': phoneNumber,
-    'is_resend':true
+    'code': code,
   };
 }
 

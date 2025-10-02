@@ -4,4 +4,5 @@ abstract class AuthRepository {
   Future<Result<void>> requestCode(String phone);
   Future<Result<void>> resendCode(String phone);
   Future<Result<void>> verifyCode(String phone, String code);
+  Future<Result<void>> getMe();
 }

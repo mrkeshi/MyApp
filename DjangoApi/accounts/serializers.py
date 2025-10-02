@@ -4,7 +4,7 @@ from django.contrib.auth import get_user_model
 
 from Province.models import Province
 from .models import PhoneOTP
-
+from .utils import normalize_phone_and_code
 
 User = get_user_model()
 
@@ -29,14 +29,18 @@ class VerifyCodeSerializer(serializers.Serializer):
     def validate(self, data):
         phone = data["phone_number"].strip().replace(" ","").replace("-","")
         code = data["code"].strip()
+        phone, code = normalize_phone_and_code(
+            data.get("phone_number", ""),
+            data.get("code", "")
+        )
         otp_qs = PhoneOTP.objects.filter(phone_number=phone, is_used=False).order_by("-created_at")
         if not otp_qs.exists():
-            raise serializers.ValidationError({"code": "هیچ کدی درخواست نشده یا قبلاً استفاده نشده است."})
+            raise serializers.ValidationError({"detail": "هیچ کدی درخواست نشده یا قبلاً استفاده نشده است."})
         otp = otp_qs.first()
         if otp.is_expired():
-            raise serializers.ValidationError({"code": "کد به اتمام رسیده هست."})
+            raise serializers.ValidationError({"detail": "کد به اتمام رسیده هست."})
         if otp.code != code:
-            raise serializers.ValidationError({"code": "کد نامتعتبر هست"})
+            raise serializers.ValidationError({"detail": "کد نامتعتبر هست"})
         data["otp_obj"] = otp
         return data
 
