@@ -1,4 +1,3 @@
-// lib/features/auth/data/models/user_dto.dart
 import 'package:aria/features/auth/domain/entities/user.dart';
 
 class UserDto {
@@ -23,16 +22,21 @@ class UserDto {
   });
 
   factory UserDto.fromJson(Map<String, dynamic> json) {
+    final rawImage = json['profile_image'];
+    final imageStr = (rawImage == null || (rawImage is String && rawImage.isEmpty))
+        ? null
+        : rawImage.toString();
+
     return UserDto(
       id: json['id'] as int,
       username: (json['username'] ?? '').toString(),
       phoneNumber: json['phone_number']?.toString(),
       firstName: json['first_name']?.toString(),
       lastName: json['last_name']?.toString(),
-      profileImage: json['profile_image']?.toString(),
+      profileImage: imageStr,
       province: json['province'] is int ? json['province'] as int : null,
       provinceDetail: (json['province_detail'] is Map<String, dynamic>)
-          ? (json['province_detail'] as Map<String, dynamic>)
+          ? Map<String, dynamic>.from(json['province_detail'] as Map)
           : <String, dynamic>{},
     );
   }

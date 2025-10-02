@@ -37,3 +37,15 @@ def normalize_phone_and_code(phone: str, code: str) -> Tuple[str, str]:
 
     c = to_english_digits(code).strip()
     return p, c
+def normalize_phone(phone: str) -> Tuple[str, str]:
+
+    p = to_english_digits(phone).strip()
+
+    if p.startswith("+"):
+        p = "+" + re.sub(r"[\s\-\u2010-\u2015\u2212_]", "", p[1:])
+    else:
+        p = re.sub(r"[\s\-\u2010-\u2015\u2212_]", "", p)
+
+
+    return p
+

@@ -43,12 +43,11 @@ class AuthRemoteDataSource {
     }
   }
 
-  // NOTE: برای سازگاری عقب‌رو؛ متد قبلی را نگه می‌داریم.
+  // جهت سازگاری با کد قبلی
   Future<Map<String, dynamic>> VerifyCode(VerifyRequestCodeDto dto) async {
     return verifyCode(dto);
   }
 
-  // نسخه‌ی استاندارد نام‌گذاری
   Future<Map<String, dynamic>> verifyCode(VerifyRequestCodeDto dto) async {
     final res = await client.dio.post(
       '/api/v1/auth/verify-code/',
@@ -67,7 +66,7 @@ class AuthRemoteDataSource {
     return res.data as Map<String, dynamic>;
   }
 
-  /// گرفتن پروفایل من /api/v1/me/ با استفاده از access_token از SharedPreferences
+
   Future<UserDto> getMe() async {
     final prefs = await SharedPreferences.getInstance();
     final accessToken = prefs.getString('access_token');
@@ -82,9 +81,7 @@ class AuthRemoteDataSource {
 
     final res = await client.dio.get(
       '/api/v1/me/',
-      options: Options(
-        headers: {'Authorization': 'Bearer $accessToken'},
-      ),
+      options: Options(headers: {'Authorization': 'Bearer $accessToken'}),
     );
 
     if (res.statusCode != 200) {
@@ -99,13 +96,9 @@ class AuthRemoteDataSource {
     return UserDto.fromJson(res.data as Map<String, dynamic>);
   }
 
-
   Future<UserDto> patchMe({
-    String? username,
     String? firstName,
     String? lastName,
-    String? phoneNumber,
-    int? province,
     MultipartFile? profileImage,
   }) async {
     final prefs = await SharedPreferences.getInstance();
@@ -119,22 +112,20 @@ class AuthRemoteDataSource {
       );
     }
 
-    final form = FormData.fromMap({
-      if (username != null) 'username': username,
-      if (firstName != null) 'first_name': firstName,
-      if (lastName != null) 'last_name': lastName,
-      if (phoneNumber != null) 'phone_number': phoneNumber,
-      if (province != null) 'province': province,
-      if (profileImage != null) 'profile_image': profileImage,
-    });
+    final data = <String, dynamic>{};
+    if (firstName != null) data['first_name'] = firstName;
+    if (lastName != null) data['last_name'] = lastName;
+    if (profileImage != null) data['profile_image'] = profileImage;
+
+    final options = Options(
+      headers: {'Authorization': 'Bearer $accessToken'},
+      contentType: profileImage != null ? 'multipart/form-data' : 'application/json',
+    );
 
     final res = await client.dio.patch(
       '/api/v1/me/',
-      data: form,
-      options: Options(
-        headers: {'Authorization': 'Bearer $accessToken'},
-        contentType: 'multipart/form-data',
-      ),
+      data: profileImage != null ? FormData.fromMap(data) : data,
+      options: options,
     );
 
     if (res.statusCode != 200) {

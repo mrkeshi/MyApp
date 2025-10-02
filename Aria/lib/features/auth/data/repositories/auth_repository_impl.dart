@@ -36,12 +36,18 @@ class AuthRepositoryImpl implements AuthRepository {
   Future<Result<void>> verifyCode(String phone, String code) async {
     try {
       final verifyDto = VerifyRequestCodeDto(phoneNumber: phone, code: code);
-
-
       final res = await remote.verifyCode(verifyDto);
 
-      final accessToken = res['access_token'];
-      final refreshToken = res['refresh_token'];
+
+      final String? accessToken =
+      (res['access'] ?? res['access_token'])?.toString();
+      final String? refreshToken =
+      (res['refresh'] ?? res['refresh_token'])?.toString();
+
+      if (accessToken == null || accessToken.isEmpty ||
+          refreshToken == null || refreshToken.isEmpty) {
+        return Err(Failure('پاسخ نامعتبر از سرور: توکن‌ها یافت نشد.'));
+      }
 
       final prefs = await SharedPreferences.getInstance();
       await prefs.setString('access_token', accessToken);
@@ -74,7 +80,6 @@ class AuthRepositoryImpl implements AuthRepository {
     }
   }
 
-
   @override
   Future<Result<User>> getMe() async {
     try {
@@ -87,6 +92,41 @@ class AuthRepositoryImpl implements AuthRepository {
       return Err(Failure(msg, code: e.response?.statusCode));
     } catch (_) {
       return Err(Failure('مشکل غیرمنتظره، دوباره تلاش کنید.'));
+    }
+  }
+
+  @override
+  Future<Result<User>> updateMe({
+    String? firstName,
+    String? lastName,
+    MultipartFile? profileImage,
+  }) async {
+    try {
+      final dto = await remote.patchMe(
+        firstName: firstName,
+        lastName: lastName,
+        profileImage: profileImage,
+      );
+      return Ok(dto.toEntity());
+    } on DioException catch (e) {
+      final msg = e.response?.data is Map
+          ? (e.response?.data['detail']?.toString() ?? 'خطای به‌روزرسانی پروفایل')
+          : 'خطای به‌روزرسانی پروفایل';
+      return Err(Failure(msg, code: e.response?.statusCode));
+    } catch (_) {
+      return Err(Failure('مشکل غیرمنتظره در به‌روزرسانی.'));
+    }
+  }
+
+  @override
+  Future<Result<void>> logout() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.remove('access_token');
+      await prefs.remove('refresh_token');
+      return const Ok(null);
+    } catch (_) {
+      return Err(Failure('خروج ناموفق. دوباره امتحان کنید.'));
     }
   }
 }

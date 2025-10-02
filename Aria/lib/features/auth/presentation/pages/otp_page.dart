@@ -380,14 +380,14 @@ class _OtpPageState extends State<OtpPage> {
                   ? null
                   : () async {
                 try {
-                  final success = await authController.verifyCode();
+                  final route = await authController.verifyThenDecideRoute();
                   if (!mounted) return;
-                  if (success) {
-                    Navigator.pushReplacementNamed(context, '/home');
-                  } else {
-                    final msg = authController.errorText ?? 'کد نامعتبر است.';
+                  if (route == null) {
+                    final msg = authController.errorText ?? 'مشکل در احراز هویت.';
                     _showErrorSnack(_extractErrorMessage(msg));
+                    return;
                   }
+                  Navigator.pushReplacementNamed(context, route);
                 } catch (e) {
                   if (!mounted) return;
                   _showErrorSnack(_extractErrorMessage(e));
