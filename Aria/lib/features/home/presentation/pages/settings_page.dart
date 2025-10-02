@@ -1,0 +1,177 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
+
+class SettingsPage extends StatelessWidget {
+  const SettingsPage({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: const Color(0xFF111314),
+      body: Directionality(
+        textDirection: TextDirection.rtl,
+        child: SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 20),
+            child: DefaultTextStyle(
+              style: DefaultTextStyle.of(context).style.copyWith(color: Colors.white),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  const SizedBox(height: 8),
+
+                  Text(
+                    'تنظیمات کاربری',
+                    textAlign: TextAlign.center,
+                    style: Theme.of(context).textTheme.headlineSmall,
+                  ),
+                  const SizedBox(height: 26),
+
+                  _SettingItem(
+                    title: 'ویرایش پروفایل',
+                    icon: Icons.person,
+                    iconBg: const Color(0xFF6E6BDE),
+                    onTap: () => Navigator.pushNamed(context, '/edit-profile'),
+                  ),
+                  const SizedBox(height: 14),
+
+
+                  _SettingItem(
+                    title: 'انتخاب استان',
+                    svgPath: 'assets/svg/ir.svg',
+                    iconBg: const Color(0xFF8B8B90),
+                    onTap: () => Navigator.pushNamed(context, '/choose-province'),
+                  ),
+                  const SizedBox(height: 14),
+
+                  _SettingItem(
+                    title: 'انتخاب تم',
+                    icon: Icons.palette,
+                    iconBg: const Color(0xFFFFA629),
+                    onTap: () => Navigator.pushNamed(context, '/choose-theme'),
+                  ),
+                  const SizedBox(height: 14),
+
+                  _SettingItem(
+                    title: 'درباره توسعه‌دهنده',
+                    icon: Icons.code_rounded,
+                    iconBg: const Color(0xFF2ED573),
+                    onTap: () => Navigator.pushNamed(context, '/about-dev'),
+                  ),
+
+                  const Spacer(),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+
+      // منوی پایین: TODO
+      bottomNavigationBar: const _BottomBarTodo(),
+    );
+  }
+}
+
+class _SettingItem extends StatelessWidget {
+  final String title;
+  final IconData? icon;
+  final String? svgPath;
+  final Color iconBg;
+  final VoidCallback onTap;
+
+  const _SettingItem({
+    required this.title,
+    this.icon,
+    this.svgPath,
+    required this.iconBg,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: const Color(0xFF1B1E20),
+      elevation: 0,
+      borderRadius: BorderRadius.circular(14),
+      child: InkWell(
+        borderRadius: BorderRadius.circular(14),
+        onTap: onTap,
+        child: Container(
+          height: 56,
+          padding: const EdgeInsets.symmetric(horizontal: 12),
+          child: Row(
+            children: [
+              // آیکن / SVG سمت راست
+              Container(
+                height: 44,
+                width: 44,
+                decoration: BoxDecoration(
+                  color: iconBg,
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Center(
+                  child: svgPath != null
+                      ? SvgPicture.asset(
+                    svgPath!,
+                    width: 28,
+                    height: 28,
+                    color: Colors.white,
+                  )
+                      : Icon(
+                    icon,
+                    color: Colors.white,
+                    size: 28,
+                  ),
+                ),
+              ),
+              const SizedBox(width: 15),
+
+              // متن آیتم
+              Expanded(
+                child: Align(
+                  alignment: Alignment.centerRight,
+                  child: Text(
+                    title,
+                    overflow: TextOverflow.ellipsis,
+                    style: Theme.of(context).textTheme.titleMedium,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _BottomBarTodo extends StatelessWidget {
+  const _BottomBarTodo();
+
+  @override
+  Widget build(BuildContext context) {
+    return Directionality(
+      textDirection: TextDirection.rtl,
+      child: Container(
+        height: 72,
+        padding: const EdgeInsets.symmetric(horizontal: 16),
+        decoration: const BoxDecoration(
+          color: Color(0xFF1A1C1E),
+          border: Border(
+            top: BorderSide(color: Colors.white12, width: 1),
+          ),
+        ),
+        child: Center(
+          child: Opacity(
+            opacity: 0.7,
+            child: Text(
+              'TODO: Bottom Navigation (بعداً جایگزین می‌شود)',
+              style: Theme.of(context).textTheme.bodyMedium,
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}

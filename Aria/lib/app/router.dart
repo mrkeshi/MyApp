@@ -1,4 +1,5 @@
 import 'package:aria/app/splash_screen.dart';
+import 'package:aria/features/home/presentation/pages/settings_screen.dart';
 import 'package:aria/features/home/presentation/pages/welcome_Screen.dart';
 import 'package:flutter/material.dart';
 import '../features/auth/presentation/pages/edit_profile_page.dart';
@@ -12,11 +13,18 @@ class AppRouter {
       case '/':
         return MaterialPageRoute(builder: (_) => SplashScreen());
       case '/home':
-        return MaterialPageRoute(builder: (_) => HomeScreen());
+        return MaterialPageRoute(builder: (_) => HomePage());
       case '/welcome':
         return MaterialPageRoute(builder: (_)=>OnboardingScreen());
       case '/edit-profile':
         return MaterialPageRoute(builder: (_)=>EditProfilePage());
+    // '/edit-profile': (_) => const Placeholder(), // TODO
+    // '/choose-province': (_) => const Placeholder(), // TODO
+   //  '/choose-theme': (_) => const Placeholder(), // TODO
+    // '/about-dev': (_) => const Placeholder(), // TODO
+      case '/settings':
+        return MaterialPageRoute(builder: (_)=>SettingsPage());
+
       case '/otp': {
         final args = settings.arguments;
         String phone = '';
