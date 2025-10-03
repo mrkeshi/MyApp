@@ -1,3 +1,4 @@
+import 'package:aria/shared/styles/colors.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:provider/provider.dart';
@@ -11,7 +12,7 @@ class SettingsPage extends StatelessWidget {
     final authController = Provider.of<AuthController>(context);
 
     return Scaffold(
-      backgroundColor: const Color(0xFF111314),
+      backgroundColor: AppColors.black,
       body: Directionality(
         textDirection: TextDirection.rtl,
         child: SafeArea(
@@ -22,7 +23,7 @@ class SettingsPage extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  const SizedBox(height: 8),
+                  const SizedBox(height: 42),
                   Text(
                     'تنظیمات کاربری',
                     textAlign: TextAlign.center,
@@ -77,7 +78,7 @@ class SettingsPage extends StatelessWidget {
           ),
         ),
       ),
-      bottomNavigationBar: const _BottomBarTodo(),
+
     );
   }
 
@@ -199,32 +200,4 @@ class _SettingItem extends StatelessWidget {
   }
 }
 
-class _BottomBarTodo extends StatelessWidget {
-  const _BottomBarTodo();
 
-  @override
-  Widget build(BuildContext context) {
-    return Directionality(
-      textDirection: TextDirection.rtl,
-      child: Container(
-        height: 72,
-        padding: const EdgeInsets.symmetric(horizontal: 16),
-        decoration: const BoxDecoration(
-          color: Color(0xFF1A1C1E),
-          border: Border(
-            top: BorderSide(color: Colors.white12, width: 1),
-          ),
-        ),
-        child: Center(
-          child: Opacity(
-            opacity: 0.7,
-            child: Text(
-              'TODO: Bottom Navigation (بعداً جایگزین می‌شود)',
-              style: Theme.of(context).textTheme.bodyMedium,
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-}

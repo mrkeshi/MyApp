@@ -2,6 +2,7 @@
   import 'dart:io';
   import 'package:dio/dio.dart';
   import 'package:flutter/material.dart';
+import 'package:flutter_svg/svg.dart';
   import 'package:image_picker/image_picker.dart';
   import 'package:provider/provider.dart';
 
@@ -176,17 +177,32 @@
         appBar: AppBar(
           backgroundColor: AppColors.black,
           elevation: 0,
+          leading: IconButton(
+            onPressed: () => Navigator.pop(context),
+            icon: SvgPicture.asset(
+              'assets/svg/back_arrow.svg',
+              color: primary,
+              width: 20,
+              height: 20,
+            ),
+          ),
           title: const Text(
-            'ایجاد پروفایل',
-            style: TextStyle(color: Colors.white),
+            'پروفایل',
+            style: TextStyle(
+              color: Colors.white,
+              fontFamily: 'customy',
+              fontSize: 19,
+              fontWeight: FontWeight.w400,
+            ),
           ),
           centerTitle: true,
         ),
+
         body: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 15),
           child: ListView(
             children: [
-              const SizedBox(height: 16),
+              const SizedBox(height: 18),
 
               Center(
                 child: GestureDetector(
@@ -289,7 +305,7 @@
                 onPressed: auth.isLoading ? null : _submit,
                 backgroundColor: primary,
                 fontWeight: FontWeight.w400,
-                height: 45,
+                height: 50,
                 borderRadius: 12,
               ),
 

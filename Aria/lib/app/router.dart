@@ -1,3 +1,4 @@
+import 'package:aria/app/main_nav_host.dart';
 import 'package:aria/app/splash_screen.dart';
 import 'package:aria/features/home/presentation/pages/settings_screen.dart';
 import 'package:aria/features/home/presentation/pages/welcome_Screen.dart';
@@ -9,27 +10,28 @@ import '../features/home/presentation/pages/about-dev_page.dart';
 import '../features/home/presentation/pages/home_screen.dart';
 import '../features/home/presentation/pages/theme_select_page.dart';
 
+
 class AppRouter {
   static Route<dynamic> generateRoute(RouteSettings settings) {
     switch (settings.name) {
       case '/':
         return MaterialPageRoute(builder: (_) => SplashScreen());
       case '/home':
-        return MaterialPageRoute(builder: (_) => HomePage());
-      case '/welcome':
-        return MaterialPageRoute(builder: (_)=>OnboardingScreen());
-      case '/edit-profile':
-        return MaterialPageRoute(builder: (_)=>EditProfilePage());
-      case '/select-theme':
-        return MaterialPageRoute(builder: (_)=>ThemeSelectPage());
-    // '/edit-profile': (_) => const Placeholder(), // TODO
-    // '/choose-province': (_) => const Placeholder(), // TODO
-   //  '/choose-theme': (_) => const Placeholder(), // TODO
-    case '/about-dev':
-      return MaterialPageRoute(builder: (_)=>AboutDeveloperPage());
+        return MaterialPageRoute(builder: (_) => const MainNavHost(initialIndex: 1));
       case '/settings':
-        return MaterialPageRoute(builder: (_)=>SettingsPage());
-
+        return MaterialPageRoute(builder: (_) => const MainNavHost(initialIndex: 0));
+      case '/bookmark':
+        return MaterialPageRoute(builder: (_) => const MainNavHost(initialIndex: 2));
+      case '/gallery':
+        return MaterialPageRoute(builder: (_) => const MainNavHost(initialIndex: 3));
+      case '/welcome':
+        return MaterialPageRoute(builder: (_) => OnboardingScreen());
+      case '/edit-profile':
+        return MaterialPageRoute(builder: (_) => EditProfilePage());
+      case '/select-theme':
+        return MaterialPageRoute(builder: (_) => ThemeSelectPage());
+      case '/about-dev':
+        return MaterialPageRoute(builder: (_) => AboutDeveloperPage());
       case '/otp': {
         final args = settings.arguments;
         String phone = '';
@@ -43,7 +45,6 @@ class AppRouter {
 
         return MaterialPageRoute(builder: (_) => OtpPage(phone: phone));
       }
-
       case '/login':
         return MaterialPageRoute(builder: (_) => LoginPage());
       default:

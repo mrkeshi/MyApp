@@ -1,6 +1,7 @@
 import 'package:aria/features/home/presentation/pages/settings_page.dart';
 import 'package:flutter/material.dart';
 
+
 class HomePage extends StatelessWidget {
   const HomePage({super.key});
 
@@ -9,7 +10,7 @@ class HomePage extends StatelessWidget {
     final primary = Theme.of(context).primaryColor;
 
     return Scaffold(
-      backgroundColor: const Color(0xFF111314),
+
       body: Center(
         child: ElevatedButton(
           style: ElevatedButton.styleFrom(
@@ -35,6 +36,7 @@ class HomePage extends StatelessWidget {
           ),
         ),
       ),
+
     );
   }
 }
