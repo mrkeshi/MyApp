@@ -40,7 +40,7 @@ class SettingsPage extends StatelessWidget {
                 _SettingItem(
                   title: 'انتخاب استان',
                   icon: Icons.map_rounded,
-                  iconBg: const Color(0xFF8B8B90), // خاکستری مطابق شِمای تصویر
+                  iconBg: const Color(0xFF8B8B90),
                   onTap: () => Navigator.pushNamed(context, '/choose-province'),
                 ),
                 const SizedBox(height: 12),
@@ -48,19 +48,18 @@ class SettingsPage extends StatelessWidget {
                 _SettingItem(
                   title: 'انتخاب تم',
                   icon: Icons.wb_sunny_rounded,
-                  iconBg: const Color(0xFFFFA629), // نارنجیِ تصویر
-                  onTap: () => Navigator.pushNamed(context, '/choose-theme'),
+                  iconBg: const Color(0xFFFFA629),
+                  onTap: () => Navigator.pushNamed(context, '/select-theme'),
                 ),
                 const SizedBox(height: 12),
 
                 _SettingItem(
                   title: 'درباره توسعه‌دهنده',
                   icon: Icons.code_rounded,
-                  iconBg: const Color(0xFF2ED573), // سبز
+                  iconBg: const Color(0xFF2ED573),
                   onTap: () => Navigator.pushNamed(context, '/about-dev'),
                 ),
 
-                // فاصله تا منوی پایین
                 const Spacer(),
               ],
             ),

@@ -59,6 +59,16 @@ class SettingsPage extends StatelessWidget {
                     onTap: () => Navigator.pushNamed(context, '/about-dev'),
                   ),
 
+                  const SizedBox(height: 14),
+                  _SettingItem(
+                    title: 'خروج از حساب کاربری',
+                    icon: Icons.exit_to_app,
+                    iconBg: const Color(0xFFE74C3C),
+                    onTap: () {
+                      _showLogoutDialog(context);
+                    },
+                  ),
+
                   const Spacer(),
                 ],
               ),
@@ -66,10 +76,52 @@ class SettingsPage extends StatelessWidget {
           ),
         ),
       ),
-
-      // منوی پایین: TODO
       bottomNavigationBar: const _BottomBarTodo(),
     );
+  }
+
+  void _showLogoutDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {return AlertDialog(
+        title: const Text(
+          'آیا مطمئن هستید؟',
+          textAlign: TextAlign.right,
+        ),
+        content: const Text(
+          'آیا می‌خواهید از حساب کاربری خود خارج شوید؟',
+          textAlign: TextAlign.right,
+        ),
+        actions: <Widget>[
+          Directionality(
+            textDirection: TextDirection.rtl,
+            child: TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: const Text('خیر'),
+            ),
+          ),
+          Directionality(
+            textDirection: TextDirection.rtl,
+            child: TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+                _logout(context);
+              },
+              child: const Text('بله'),
+            ),
+          ),
+        ],
+      );
+
+      },
+    );
+  }
+
+
+  void _logout(BuildContext context) {
+    Navigator.pushReplacementNamed(context, '/welcome');
   }
 }
 
@@ -102,7 +154,6 @@ class _SettingItem extends StatelessWidget {
           padding: const EdgeInsets.symmetric(horizontal: 12),
           child: Row(
             children: [
-              // آیکن / SVG سمت راست
               Container(
                 height: 44,
                 width: 44,
@@ -127,7 +178,6 @@ class _SettingItem extends StatelessWidget {
               ),
               const SizedBox(width: 15),
 
-              // متن آیتم
               Expanded(
                 child: Align(
                   alignment: Alignment.centerRight,

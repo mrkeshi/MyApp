@@ -1,4 +1,3 @@
-// lib/features/auth/presentation/controllers/auth_controller.dart
 import 'package:flutter/material.dart';
 import 'package:aria/core/result/result.dart';
 import 'package:aria/core/utils/validators.dart';
@@ -121,7 +120,6 @@ class AuthController extends ChangeNotifier {
     }
   }
 
-  /// فقط first_name, last_name, profile_image را آپدیت کن
   Future<bool> updateProfile({
     String? firstName,
     String? lastName,

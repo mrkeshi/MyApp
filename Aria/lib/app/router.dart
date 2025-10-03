@@ -5,7 +5,9 @@ import 'package:flutter/material.dart';
 import '../features/auth/presentation/pages/edit_profile_page.dart';
 import '../features/auth/presentation/pages/login_page.dart';
 import '../features/auth/presentation/pages/otp_page.dart';
+import '../features/home/presentation/pages/about-dev_page.dart';
 import '../features/home/presentation/pages/home_screen.dart';
+import '../features/home/presentation/pages/theme_select_page.dart';
 
 class AppRouter {
   static Route<dynamic> generateRoute(RouteSettings settings) {
@@ -18,10 +20,13 @@ class AppRouter {
         return MaterialPageRoute(builder: (_)=>OnboardingScreen());
       case '/edit-profile':
         return MaterialPageRoute(builder: (_)=>EditProfilePage());
+      case '/select-theme':
+        return MaterialPageRoute(builder: (_)=>ThemeSelectPage());
     // '/edit-profile': (_) => const Placeholder(), // TODO
     // '/choose-province': (_) => const Placeholder(), // TODO
    //  '/choose-theme': (_) => const Placeholder(), // TODO
-    // '/about-dev': (_) => const Placeholder(), // TODO
+    case '/about-dev':
+      return MaterialPageRoute(builder: (_)=>AboutDeveloperPage());
       case '/settings':
         return MaterialPageRoute(builder: (_)=>SettingsPage());
 
