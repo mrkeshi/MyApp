@@ -1,8 +1,7 @@
-// lib/features/settings/presentation/pages/theme_select_page.dart
 import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-
+import 'package:provider/provider.dart';
 import '../../../../app/theme.dart';
+import '../../../../main.dart';
 import '../../../../shared/styles/colors.dart';
 
 class ThemeSelectPage extends StatefulWidget {
@@ -13,28 +12,14 @@ class ThemeSelectPage extends StatefulWidget {
 }
 
 class _ThemeSelectPageState extends State<ThemeSelectPage> {
-  final PageController _pageController =
-  PageController(viewportFraction: 0.82, keepPage: true);
-
+  final PageController _pageController = PageController(viewportFraction: 0.82, keepPage: true);
   late int _index;
   late AppThemeType _selected;
 
   final _items = <AppThemeType, _ThemeCardData>{
-    AppThemeType.yellow: _ThemeCardData(
-      title: 'نقش جهان',
-      image: 'assets/images/theme/a1.jpg',
-      keyName: 'yellow',
-    ),
-    AppThemeType.blue: _ThemeCardData(
-      title: 'آزادی',
-      image: 'assets/images/theme/a3.jpg',
-      keyName: 'blue',
-    ),
-    AppThemeType.red: _ThemeCardData(
-      title: 'نصیرالدین',
-      image: 'assets/images/theme/a2.jpg',
-      keyName: 'red',
-    ),
+    AppThemeType.yellow: _ThemeCardData(title: 'نقش جهان', image: 'assets/images/theme/a1.jpg', keyName: 'yellow'),
+    AppThemeType.blue: _ThemeCardData(title: 'آزادی', image: 'assets/images/theme/a3.jpg', keyName: 'blue'),
+    AppThemeType.red: _ThemeCardData(title: 'نصیرالدین', image: 'assets/images/theme/a2.jpg', keyName: 'red'),
   };
 
   @override
@@ -42,10 +27,10 @@ class _ThemeSelectPageState extends State<ThemeSelectPage> {
     super.initState();
     _index = 0;
     _selected = AppThemeType.yellow;
-    _load();
+    _loadTheme();
   }
 
-  Future<void> _load() async {
+  Future<void> _loadTheme() async {
     final type = await AppTheme.loadTheme();
     final i = AppThemeType.values.indexOf(type);
     setState(() {
@@ -62,14 +47,13 @@ class _ThemeSelectPageState extends State<ThemeSelectPage> {
   @override
   Widget build(BuildContext context) {
     final background = _items[_selected]!.image;
+    final themeNotifier = context.read<ThemeNotifier>();
 
     return Scaffold(
       backgroundColor: AppColors.black,
       body: Stack(
         children: [
-          Positioned.fill(
-            child: Image.asset(background, fit: BoxFit.cover),
-          ),
+          Positioned.fill(child: Image.asset(background, fit: BoxFit.cover)),
           Positioned.fill(
             child: DecoratedBox(
               decoration: BoxDecoration(
@@ -88,17 +72,10 @@ class _ThemeSelectPageState extends State<ThemeSelectPage> {
             child: Directionality(
               textDirection: TextDirection.rtl,
               child: Padding(
-                padding:
-                const EdgeInsets.symmetric(horizontal: 18.0, vertical: 8),
+                padding: const EdgeInsets.symmetric(horizontal: 18.0, vertical: 8),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    Row(
-                      children: [
-                        const SizedBox(height: 18),
-                        const Spacer(),
-                      ],
-                    ),
                     const SizedBox(height: 8),
                     Text(
                       'انتخاب تم',
@@ -113,12 +90,11 @@ class _ThemeSelectPageState extends State<ThemeSelectPage> {
                       'از شکوه نقش‌جهان و رنگ‌های نصیرالملک تا شکوه میدان آزادی؛ همه ایران اینجاست.',
                       style: Theme.of(context).textTheme.bodySmall?.copyWith(
                         color: Colors.white70,
-                        fontSize: 15
+                        fontSize: 15,
                       ),
                       textAlign: TextAlign.right,
                     ),
                     const SizedBox(height: 16),
-
                     SizedBox(
                       height: 360,
                       child: PageView.builder(
@@ -139,8 +115,7 @@ class _ThemeSelectPageState extends State<ThemeSelectPage> {
                           return AnimatedContainer(
                             duration: const Duration(milliseconds: 250),
                             curve: Curves.easeOut,
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 6, vertical: 10),
+                            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 10),
                             child: _ThemeCard(
                               data: data,
                               accent: AppTheme.getTheme(type).primaryColor,
@@ -157,10 +132,7 @@ class _ThemeSelectPageState extends State<ThemeSelectPage> {
                         },
                       ),
                     ),
-
                     const SizedBox(height: 8),
-
-                    // Dots indicator (RTL-friendly)
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: List.generate(
@@ -171,18 +143,13 @@ class _ThemeSelectPageState extends State<ThemeSelectPage> {
                           width: i == _index ? 18 : 8,
                           height: 8,
                           decoration: BoxDecoration(
-                            color: i == _index
-                                ? _primary
-                                : Colors.white.withOpacity(0.35),
+                            color: i == _index ? _primary : Colors.white.withOpacity(0.35),
                             borderRadius: BorderRadius.circular(100),
                           ),
                         ),
                       ),
                     ),
-
                     const Spacer(),
-
-                    // Save button
                     SizedBox(
                       height: 50,
                       child: ElevatedButton(
@@ -194,11 +161,9 @@ class _ThemeSelectPageState extends State<ThemeSelectPage> {
                             borderRadius: BorderRadius.circular(14),
                           ),
                         ),
-                        onPressed: () async {
-                          await AppTheme.saveTheme(_selected);
-                          if (context.mounted) {
-                            Navigator.pop(context, _selected);
-                          }
+                        onPressed: () {
+                          themeNotifier.setTheme(_selected);
+                          Navigator.pop(context);
                         },
                         child: const Text(
                           'ذخیره',
@@ -226,11 +191,7 @@ class _ThemeCardData {
   final String title;
   final String image;
   final String keyName;
-  const _ThemeCardData({
-    required this.title,
-    required this.image,
-    required this.keyName,
-  });
+  const _ThemeCardData({required this.title, required this.image, required this.keyName});
 }
 
 class _ThemeCard extends StatelessWidget {
@@ -239,12 +200,7 @@ class _ThemeCard extends StatelessWidget {
   final bool isSelected;
   final VoidCallback onTap;
 
-  const _ThemeCard({
-    required this.data,
-    required this.accent,
-    required this.isSelected,
-    required this.onTap,
-  });
+  const _ThemeCard({required this.data, required this.accent, required this.isSelected, required this.onTap});
 
   @override
   Widget build(BuildContext context) {
@@ -258,12 +214,7 @@ class _ThemeCard extends StatelessWidget {
             borderRadius: BorderRadius.circular(22),
             boxShadow: [
               if (isSelected)
-                BoxShadow(
-                  color: accent.withOpacity(0.45),
-                  blurRadius: 16,
-                  spreadRadius: 0,
-                  offset: const Offset(0, 6),
-                ),
+                BoxShadow(color: accent.withOpacity(0.45), blurRadius: 16, spreadRadius: 0, offset: const Offset(0, 6)),
             ],
           ),
           child: ClipRRect(
@@ -271,24 +222,16 @@ class _ThemeCard extends StatelessWidget {
             child: Stack(
               fit: StackFit.expand,
               children: [
-                Image.asset(
-                  data.image,
-                  fit: BoxFit.cover,
-                ),
-                // soft overlay for readability
+                Image.asset(data.image, fit: BoxFit.cover),
                 Container(
                   decoration: BoxDecoration(
                     gradient: LinearGradient(
                       begin: Alignment.center,
                       end: Alignment.bottomCenter,
-                      colors: [
-                        Colors.transparent,
-                        Colors.black.withOpacity(0.75),
-                      ],
+                      colors: [Colors.transparent, Colors.black.withOpacity(0.75)],
                     ),
                   ),
                 ),
-                // title
                 Positioned(
                   left: 16,
                   right: 16,
@@ -298,8 +241,7 @@ class _ThemeCard extends StatelessWidget {
                     child: Row(
                       children: [
                         Container(
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 12, vertical: 6),
+                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                           decoration: BoxDecoration(
                             color: Colors.black.withOpacity(0.35),
                             borderRadius: BorderRadius.circular(12),
@@ -307,12 +249,7 @@ class _ThemeCard extends StatelessWidget {
                           ),
                           child: Text(
                             data.title,
-                            style: const TextStyle(
-                              fontFamily: 'Customy',
-                              color: Colors.white,
-                              fontSize: 14,
-                              fontWeight: FontWeight.w500,
-                            ),
+                            style: const TextStyle(fontFamily: 'Customy', color: Colors.white, fontSize: 14, fontWeight: FontWeight.w500),
                           ),
                         ),
                         const Spacer(),
@@ -320,15 +257,8 @@ class _ThemeCard extends StatelessWidget {
                           Container(
                             width: 24,
                             height: 24,
-                            decoration: BoxDecoration(
-                              color: accent,
-                              shape: BoxShape.circle,
-                            ),
-                            child: const Icon(
-                              Icons.check_rounded,
-                              size: 16,
-                              color: Colors.black,
-                            ),
+                            decoration: BoxDecoration(color: accent, shape: BoxShape.circle),
+                            child: const Icon(Icons.check_rounded, size: 16, color: Colors.black),
                           ),
                       ],
                     ),
