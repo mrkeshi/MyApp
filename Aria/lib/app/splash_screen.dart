@@ -113,6 +113,8 @@ class _SplashScreenState extends State<SplashScreen>
     final refresh = prefs.getString('refresh_token');
 
     if (access != null && access.isNotEmpty && !_isJwtExpired(access)) {
+      print("hi");
+      print(access);
       return '/home';
     }
 
@@ -125,6 +127,7 @@ class _SplashScreenState extends State<SplashScreen>
   }
 
   bool _isJwtExpired(String jwt) {
+
     try {
       final parts = jwt.split('.');
       if (parts.length != 3) return true;

@@ -1,11 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:provider/provider.dart';
+import '../../../auth/presentation/controllers/auth_controller.dart';
 
 class SettingsPage extends StatelessWidget {
   const SettingsPage({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final authController = Provider.of<AuthController>(context);
+
     return Scaffold(
       backgroundColor: const Color(0xFF111314),
       body: Directionality(
@@ -19,7 +23,6 @@ class SettingsPage extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   const SizedBox(height: 8),
-
                   Text(
                     'تنظیمات کاربری',
                     textAlign: TextAlign.center,
@@ -35,7 +38,6 @@ class SettingsPage extends StatelessWidget {
                   ),
                   const SizedBox(height: 14),
 
-
                   _SettingItem(
                     title: 'انتخاب استان',
                     svgPath: 'assets/svg/ir.svg',
@@ -48,10 +50,9 @@ class SettingsPage extends StatelessWidget {
                     title: 'انتخاب تم',
                     icon: Icons.palette,
                     iconBg: const Color(0xFFFFA629),
-                    onTap: () => Navigator.pushNamed(context, '/choose-theme'),
+                    onTap: () => Navigator.pushNamed(context, '/select-theme'),
                   ),
                   const SizedBox(height: 14),
-
                   _SettingItem(
                     title: 'درباره توسعه‌دهنده',
                     icon: Icons.code_rounded,
@@ -65,7 +66,7 @@ class SettingsPage extends StatelessWidget {
                     icon: Icons.exit_to_app,
                     iconBg: const Color(0xFFE74C3C),
                     onTap: () {
-                      _showLogoutDialog(context);
+                      _showLogoutDialog(context, authController);
                     },
                   ),
 
@@ -80,48 +81,50 @@ class SettingsPage extends StatelessWidget {
     );
   }
 
-  void _showLogoutDialog(BuildContext context) {
+  void _showLogoutDialog(BuildContext context, AuthController authController) {
     showDialog(
       context: context,
-      builder: (BuildContext context) {return AlertDialog(
-        title: const Text(
-          'آیا مطمئن هستید؟',
-          textAlign: TextAlign.right,
-        ),
-        content: const Text(
-          'آیا می‌خواهید از حساب کاربری خود خارج شوید؟',
-          textAlign: TextAlign.right,
-        ),
-        actions: <Widget>[
-          Directionality(
-            textDirection: TextDirection.rtl,
-            child: TextButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-              child: const Text('خیر'),
-            ),
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text(
+            'آیا مطمئن هستید؟',
+            textAlign: TextAlign.right,
           ),
-          Directionality(
-            textDirection: TextDirection.rtl,
-            child: TextButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-                _logout(context);
-              },
-              child: const Text('بله'),
-            ),
+          content: const Text(
+            'آیا می‌خواهید از حساب کاربری خود خارج شوید؟',
+            textAlign: TextAlign.right,
           ),
-        ],
-      );
-
+          actions: <Widget>[
+            Directionality(
+              textDirection: TextDirection.rtl,
+              child: TextButton(
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+                child: const Text('خیر'),
+              ),
+            ),
+            Directionality(
+              textDirection: TextDirection.rtl,
+              child: TextButton(
+                onPressed: () async {
+                  Navigator.of(context).pop();
+                  bool success = await authController.logout();
+                  if (success) {
+                    Navigator.pushReplacementNamed(context, '/welcome');
+                  } else {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('مشکلی در خروج از حساب کاربری پیش آمده')),
+                    );
+                  }
+                },
+                child: const Text('بله'),
+              ),
+            ),
+          ],
+        );
       },
     );
-  }
-
-
-  void _logout(BuildContext context) {
-    Navigator.pushReplacementNamed(context, '/welcome');
   }
 }
 

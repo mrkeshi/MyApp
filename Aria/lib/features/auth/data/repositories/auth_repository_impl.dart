@@ -122,6 +122,7 @@ class AuthRepositoryImpl implements AuthRepository {
   Future<Result<void>> logout() async {
     try {
       final prefs = await SharedPreferences.getInstance();
+
       await prefs.remove('access_token');
       await prefs.remove('refresh_token');
       return const Ok(null);

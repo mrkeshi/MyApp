@@ -89,7 +89,6 @@ class AboutDeveloperPage extends StatelessWidget {
                   Center(
                     child: Text(
                       'توسعه دهنده',
-                      // یک پله کوچیک‌تر
                       style: themed.textTheme.bodySmall?.copyWith(
                         color: Colors.white70,
                         fontWeight: FontWeight.w500,

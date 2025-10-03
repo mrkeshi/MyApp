@@ -22,17 +22,17 @@ class _ThemeSelectPageState extends State<ThemeSelectPage> {
   final _items = <AppThemeType, _ThemeCardData>{
     AppThemeType.yellow: _ThemeCardData(
       title: 'نقش جهان',
-      image: 'assets/images/themes/a1.jpg',
+      image: 'assets/images/theme/a1.jpg',
       keyName: 'yellow',
     ),
     AppThemeType.blue: _ThemeCardData(
       title: 'آزادی',
-      image: 'assets/images/themes/a3.jpg',
+      image: 'assets/images/theme/a3.jpg',
       keyName: 'blue',
     ),
     AppThemeType.red: _ThemeCardData(
       title: 'نصیرالدین',
-      image: 'assets/images/themes/a2.jpg',
+      image: 'assets/images/theme/a2.jpg',
       keyName: 'red',
     ),
   };
@@ -95,11 +95,7 @@ class _ThemeSelectPageState extends State<ThemeSelectPage> {
                   children: [
                     Row(
                       children: [
-                        IconButton(
-                          onPressed: () => Navigator.pop(context),
-                          icon: const Icon(Icons.arrow_back_ios_new_rounded),
-                          color: Colors.white,
-                        ),
+                        const SizedBox(height: 18),
                         const Spacer(),
                       ],
                     ),
@@ -117,12 +113,12 @@ class _ThemeSelectPageState extends State<ThemeSelectPage> {
                       'از شکوه نقش‌جهان و رنگ‌های نصیرالملک تا شکوه میدان آزادی؛ همه ایران اینجاست.',
                       style: Theme.of(context).textTheme.bodySmall?.copyWith(
                         color: Colors.white70,
+                        fontSize: 15
                       ),
                       textAlign: TextAlign.right,
                     ),
                     const SizedBox(height: 16),
 
-                    // Slider
                     SizedBox(
                       height: 360,
                       child: PageView.builder(

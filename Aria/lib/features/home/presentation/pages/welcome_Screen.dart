@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:aria/shared/styles/colors.dart';
 
 import '../../../../shared/widgets/primary_button.dart';
@@ -10,14 +11,20 @@ class OnboardingScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final primary = Theme.of(context).primaryColor;
 
-    return Scaffold(
-      backgroundColor: AppColors.black,
-      body: Directionality(
-        textDirection: TextDirection.rtl,
-        child: SafeArea(
+    return AnnotatedRegion<SystemUiOverlayStyle>(
+      // کنترل ظاهر نوار وضعیت (Status Bar)
+      value: const SystemUiOverlayStyle(
+        statusBarColor: Colors.transparent, // شفاف شدن پس‌زمینه‌ی نوار وضعیت
+        statusBarIconBrightness: Brightness.light, // آیکن‌های استاتوس بار سفید
+      ),
+      child: Scaffold(
+        backgroundColor: AppColors.black, // بک‌گراند کل صفحه مشکی
+        body: Directionality(
+          textDirection: TextDirection.rtl, // متن‌ها راست به چپ
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
+              // تصویر بالای صفحه (عرض فیت و ارتفاع خودکار)
               Image.asset(
                 'assets/images/welcome2.png',
                 width: double.infinity,
@@ -26,6 +33,7 @@ class OnboardingScreen extends StatelessWidget {
 
               const SizedBox(height: 26),
 
+              // متن خوش آمد
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 20),
                 child: Column(
@@ -58,14 +66,15 @@ class OnboardingScreen extends StatelessWidget {
 
               const Spacer(),
 
+
               Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
+                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 54),
                 child: Column(
                   children: [
                     SizedBox(
                       width: double.infinity,
                       height: 52,
-                      child:PrimaryButton(
+                      child: PrimaryButton(
                         text: 'ثبت نام',
                         onPressed: () => Navigator.pushNamed(context, '/login'),
                       ),
@@ -95,7 +104,7 @@ class OnboardingScreen extends StatelessWidget {
                     ),
                   ],
                 ),
-              ),
+              )
             ],
           ),
         ),

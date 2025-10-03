@@ -83,22 +83,60 @@
       );
 
       if (!mounted) return;
+
       if (ok) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Directionality(
+              textDirection: TextDirection.rtl,
+              child: const Text(
+                'پروفایل با موفقیت آپدیت شد',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.w500,
+                  fontSize: 14,
+                ),
+                textAlign: TextAlign.start,
+              ),
+            ),
+            backgroundColor: Theme.of(context).primaryColor,
+            duration: const Duration(seconds: 3),
+            behavior: SnackBarBehavior.floating,
+            margin: const EdgeInsets.only(bottom: 10, left: 10, right: 10),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(10),
+            ),
+          ),
+        );
+
         Navigator.pushReplacementNamed(context, '/home');
       } else if (auth.errorText != null && auth.errorText!.isNotEmpty) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Directionality(
               textDirection: TextDirection.rtl,
-              child: Text(auth.errorText!,
-                  style: const TextStyle(color: Colors.white)),
+              child: Text(
+                auth.errorText!,
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.w500,
+                  fontSize: 14,
+                ),
+                textAlign: TextAlign.start,
+              ),
             ),
             backgroundColor: AppColors.redPrimary,
+            duration: const Duration(seconds: 3),
             behavior: SnackBarBehavior.floating,
+            margin: const EdgeInsets.only(bottom: 10, left: 10, right: 10),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(10),
+            ),
           ),
         );
       }
     }
+
 
     InputDecoration _inputDecoration(BuildContext context, String hint) {
       final primary = Theme.of(context).primaryColor;
@@ -168,13 +206,16 @@
                       CircleAvatar(
                         radius: 50,
                         backgroundColor: AppColors.black,
-                        backgroundImage:
-                        pickedImage != null ? FileImage(pickedImage!) : null,
-                        child: pickedImage == null
-                            ? const Icon(Icons.person,
-                            color: Colors.white70, size: 40)
+                        backgroundImage: pickedImage != null
+                            ? FileImage(pickedImage!)
+                            : (auth.currentUser?.profileImage != null
+                            ? NetworkImage(auth.currentUser!.profileImage!)
+                            : null) as ImageProvider?,
+                        child: pickedImage == null && auth.currentUser?.profileImage == null
+                            ? const Icon(Icons.person, color: Colors.white70, size: 40)
                             : null,
                       ),
+
                       Positioned(
                         right: 6,
                         bottom: 6,
@@ -247,6 +288,7 @@
                 text: auth.isLoading ? '...' : 'ثبت پروفایل',
                 onPressed: auth.isLoading ? null : _submit,
                 backgroundColor: primary,
+                fontWeight: FontWeight.w400,
                 height: 45,
                 borderRadius: 12,
               ),
