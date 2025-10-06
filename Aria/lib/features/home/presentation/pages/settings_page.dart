@@ -23,7 +23,7 @@ class SettingsPage extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  const SizedBox(height: 42),
+                  const SizedBox(height: 12),
                   Text(
                     'تنظیمات کاربری',
                     textAlign: TextAlign.center,

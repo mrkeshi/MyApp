@@ -109,8 +109,13 @@ import 'package:flutter_svg/svg.dart';
             ),
           ),
         );
+        final auth = context.read<AuthController>();
+        final step = await auth.resolveNextStep();
+        if (!mounted) return;
 
-        Navigator.pushReplacementNamed(context, '/home');
+        final target = (step == NextStep.chooseProvince) ? '/choose-province' : '/home';
+        Navigator.of(context).pushNamedAndRemoveUntil(target, (r) => false);
+
       } else if (auth.errorText != null && auth.errorText!.isNotEmpty) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(

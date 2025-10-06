@@ -12,19 +12,19 @@ class OnboardingScreen extends StatelessWidget {
     final primary = Theme.of(context).primaryColor;
 
     return AnnotatedRegion<SystemUiOverlayStyle>(
-      // کنترل ظاهر نوار وضعیت (Status Bar)
+
       value: const SystemUiOverlayStyle(
-        statusBarColor: Colors.transparent, // شفاف شدن پس‌زمینه‌ی نوار وضعیت
-        statusBarIconBrightness: Brightness.light, // آیکن‌های استاتوس بار سفید
+        statusBarColor: Colors.transparent,
+        statusBarIconBrightness: Brightness.light,
       ),
       child: Scaffold(
-        backgroundColor: AppColors.black, // بک‌گراند کل صفحه مشکی
+        backgroundColor: AppColors.black,
         body: Directionality(
-          textDirection: TextDirection.rtl, // متن‌ها راست به چپ
+          textDirection: TextDirection.rtl,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              // تصویر بالای صفحه (عرض فیت و ارتفاع خودکار)
+
               Image.asset(
                 'assets/images/welcome2.png',
                 width: double.infinity,
@@ -33,7 +33,7 @@ class OnboardingScreen extends StatelessWidget {
 
               const SizedBox(height: 26),
 
-              // متن خوش آمد
+
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 20),
                 child: Column(
@@ -68,7 +68,7 @@ class OnboardingScreen extends StatelessWidget {
 
 
               Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
+                padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 40),
                 child: Column(
                   children: [
                     SizedBox(
@@ -100,6 +100,7 @@ class OnboardingScreen extends StatelessWidget {
                             ),
                           ),
                         ),
+
                       ],
                     ),
                   ],

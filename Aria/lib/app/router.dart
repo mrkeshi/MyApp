@@ -2,6 +2,7 @@ import 'package:aria/app/main_nav_host.dart';
 import 'package:aria/app/splash_screen.dart';
 import 'package:aria/features/home/presentation/pages/settings_screen.dart';
 import 'package:aria/features/home/presentation/pages/welcome_Screen.dart';
+import 'package:aria/features/province/presentation/pages/select_province_page.dart';
 import 'package:flutter/material.dart';
 import '../features/auth/presentation/pages/edit_profile_page.dart';
 import '../features/auth/presentation/pages/login_page.dart';
@@ -32,6 +33,8 @@ class AppRouter {
         return MaterialPageRoute(builder: (_) => ThemeSelectPage());
       case '/about-dev':
         return MaterialPageRoute(builder: (_) => AboutDeveloperPage());
+      case '/choose-province':
+        return MaterialPageRoute(builder: (_) => IranMapScreen());
       case '/otp': {
         final args = settings.arguments;
         String phone = '';

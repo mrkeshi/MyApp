@@ -1,9 +1,16 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:aria/core/result/result.dart';
 import 'package:aria/core/utils/validators.dart';
 import 'package:aria/features/auth/domain/repositories/auth_repository.dart';
 import 'package:aria/features/auth/domain/entities/user.dart';
 import 'package:dio/dio.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+
+import '../../../../core/network/dio_client.dart';
+
+enum NextStep { welcome, chooseProvince, editProfile, home }
 
 class AuthController extends ChangeNotifier {
   AuthController(this._repo);
@@ -200,5 +207,93 @@ class AuthController extends ChangeNotifier {
     (currentUser!.lastName != null && currentUser!.lastName!.trim().isNotEmpty);
 
     return hasLastName ? '/home' : '/edit-profile';
+  }
+  Future<NextStep> resolveNextStep() async {
+    final prefs = await SharedPreferences.getInstance();
+    final access = prefs.getString('access_token');
+    final refresh = prefs.getString('refresh_token');
+
+    Future<NextStep> afterAuth() async {
+      final ok = await loadMe();
+      if (!ok || currentUser == null) return NextStep.welcome;
+
+      final u = currentUser!;
+      final isProvinceMissing = (u.province == null || u.province == 0);
+      final isProfileIncomplete = (u.firstName == null || u.firstName!.trim().isEmpty) ||
+          (u.lastName  == null || u.lastName!.trim().isEmpty);
+      if (isProfileIncomplete) return NextStep.editProfile;
+      if (isProvinceMissing)   return NextStep.chooseProvince;
+
+      return NextStep.home;
+    }
+
+    if (access != null && access.isNotEmpty && !_isJwtExpired(access)) {
+      return afterAuth();
+    }
+    if (refresh != null && refresh.isNotEmpty) {
+      final refreshed = await _tryRefreshWithPrefs(prefs, refresh);
+      return refreshed ? await afterAuth() : NextStep.welcome;
+    }
+    return NextStep.welcome;
+  }
+  bool _isJwtExpired(String jwt) {
+
+    try {
+      final parts = jwt.split('.');
+      if (parts.length != 3) return true;
+
+      String payload = parts[1].replaceAll('-', '+').replaceAll('_', '/');
+      while (payload.length % 4 != 0) {
+        payload += '=';
+      }
+      final decoded =
+      json.decode(utf8.decode(base64.decode(payload))) as Map<String, dynamic>;
+
+      final exp = (decoded['exp'] as num?)?.toInt();
+      if (exp == null) return true;
+
+      final nowSec = DateTime.now().millisecondsSinceEpoch ~/ 1000;
+      return exp <= nowSec;
+    } catch (_) {
+      return true;
+    }
+  }
+
+  Future<bool> _tryRefreshWithPrefs(
+      SharedPreferences prefs, String refreshToken) async {
+    try {
+      final baseUrl = const String.fromEnvironment(
+        'API_BASE',
+        defaultValue: 'http://10.0.2.2:8000',
+      );
+      final dio = DioClient(baseUrl: baseUrl).dio;
+
+      final res = await dio.post(
+        '/api/v1/auth/refresh/',
+        data: {'refresh': refreshToken},
+        options: Options(
+          contentType: Headers.jsonContentType,
+        ),
+      );
+
+      if (res.statusCode == 200 && res.data is Map) {
+        final map = res.data as Map;
+
+        final newAccess = (map['access'] ?? map['access_token']) as String?;
+        final newRefresh = (map['refresh'] ?? map['refresh_token']) as String?;
+
+        if (newAccess != null && newAccess.isNotEmpty) {
+          await prefs.setString('access_token', newAccess);
+        }
+        if (newRefresh != null && newRefresh.isNotEmpty) {
+          await prefs.setString('refresh_token', newRefresh);
+        }
+
+        return newAccess != null && newAccess.isNotEmpty;
+      }
+      return false;
+    } catch (_) {
+      return false;
+    }
   }
 }
