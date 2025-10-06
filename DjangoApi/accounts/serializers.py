@@ -67,5 +67,5 @@ class ChangeProvinceSerializer(serializers.Serializer):
         try:
             Province.objects.get(pk=value)
         except Province.DoesNotExist:
-            raise serializers.ValidationError("Invalid province id")
+            raise serializers.ValidationError({"detail": "نا معتبر هست"})
         return value
