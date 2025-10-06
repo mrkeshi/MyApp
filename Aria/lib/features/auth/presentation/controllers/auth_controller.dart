@@ -9,6 +9,8 @@ import 'package:dio/dio.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../../../core/network/dio_client.dart';
+import '../../../province/data/datasource/province_remote.dart';
+import '../../../province/data/repositories/province_repository_impl.dart';
 
 enum NextStep { welcome, chooseProvince, editProfile, home }
 
@@ -204,10 +206,12 @@ class AuthController extends ChangeNotifier {
     if (!meOk || currentUser == null) return null;
 
     final hasLastName =
-    (currentUser!.lastName != null && currentUser!.lastName!.trim().isNotEmpty);
+        (currentUser!.lastName != null &&
+            currentUser!.lastName!.trim().isNotEmpty);
 
     return hasLastName ? '/home' : '/edit-profile';
   }
+
   Future<NextStep> resolveNextStep() async {
     final prefs = await SharedPreferences.getInstance();
     final access = prefs.getString('access_token');
@@ -219,10 +223,24 @@ class AuthController extends ChangeNotifier {
 
       final u = currentUser!;
       final isProvinceMissing = (u.province == null || u.province == 0);
-      final isProfileIncomplete = (u.firstName == null || u.firstName!.trim().isEmpty) ||
-          (u.lastName  == null || u.lastName!.trim().isEmpty);
+      final isProfileIncomplete =
+          (u.firstName == null || u.firstName!.trim().isEmpty) ||
+          (u.lastName == null || u.lastName!.trim().isEmpty);
+
       if (isProfileIncomplete) return NextStep.editProfile;
-      if (isProvinceMissing)   return NextStep.chooseProvince;
+      if (isProvinceMissing) return NextStep.chooseProvince;
+
+      try {
+        final provinceId = u.province;
+        if (provinceId != null && provinceId != 0) {
+          final repo = ProvinceRepositoryImpl(
+            ProvinceRemote(Dio(BaseOptions(baseUrl: 'http://10.0.2.2:8000'))),
+          );
+          await repo.getProvinceDetail(provinceId);
+        }
+      } catch (e) {
+        debugPrint('Failed to fetch province detail: $e');
+      }
 
       return NextStep.home;
     }
@@ -236,8 +254,8 @@ class AuthController extends ChangeNotifier {
     }
     return NextStep.welcome;
   }
-  bool _isJwtExpired(String jwt) {
 
+  bool _isJwtExpired(String jwt) {
     try {
       final parts = jwt.split('.');
       if (parts.length != 3) return true;
@@ -247,7 +265,8 @@ class AuthController extends ChangeNotifier {
         payload += '=';
       }
       final decoded =
-      json.decode(utf8.decode(base64.decode(payload))) as Map<String, dynamic>;
+          json.decode(utf8.decode(base64.decode(payload)))
+              as Map<String, dynamic>;
 
       final exp = (decoded['exp'] as num?)?.toInt();
       if (exp == null) return true;
@@ -260,7 +279,9 @@ class AuthController extends ChangeNotifier {
   }
 
   Future<bool> _tryRefreshWithPrefs(
-      SharedPreferences prefs, String refreshToken) async {
+    SharedPreferences prefs,
+    String refreshToken,
+  ) async {
     try {
       final baseUrl = const String.fromEnvironment(
         'API_BASE',
@@ -271,9 +292,7 @@ class AuthController extends ChangeNotifier {
       final res = await dio.post(
         '/api/v1/auth/refresh/',
         data: {'refresh': refreshToken},
-        options: Options(
-          contentType: Headers.jsonContentType,
-        ),
+        options: Options(contentType: Headers.jsonContentType),
       );
 
       if (res.statusCode == 200 && res.data is Map) {
