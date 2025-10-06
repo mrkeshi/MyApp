@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
+import '../features/gallery/presentation/pages/gallery_page.dart';
 import '../features/home/presentation/pages/home_screen.dart';
 import '../features/home/presentation/pages/settings_page.dart';
 import '../shared/styles/colors.dart';
@@ -22,7 +23,7 @@ class _MainNavHostState extends State<MainNavHost> {
     SettingsPage(),
     HomePage(),
     // BookmarkPage(),
-    // GalleryPage(),
+    GalleryPage(),
   ];
 
   final List<IconData> _icons = [

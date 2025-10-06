@@ -23,11 +23,35 @@ class SettingsPage extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  const SizedBox(height: 12),
-                  Text(
-                    'تنظیمات کاربری',
-                    textAlign: TextAlign.center,
-                    style: Theme.of(context).textTheme.headlineSmall,
+                  const SizedBox(height: 6),
+
+                  Row(
+                    children: [
+                      const SizedBox(width: 48),
+                      Expanded(
+                        child: Text(
+                          'تنظیمات کاربری',
+                          textAlign: TextAlign.center,
+                          style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                            color: Colors.white,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                      ),
+                      Transform.translate(
+                        offset: const Offset(-12, 0),
+                        child: IconButton(
+                          padding: const EdgeInsets.all(8),
+                          icon: SvgPicture.asset(
+                            'assets/svg/back_arrow.svg',
+                            color: Theme.of(context).primaryColor,
+                            width: 22,
+                            height: 22,
+                          ),
+                          onPressed: () => Navigator.pop(context),
+                        ),
+                      ),
+                    ],
                   ),
                   const SizedBox(height: 26),
 
@@ -54,21 +78,20 @@ class SettingsPage extends StatelessWidget {
                     onTap: () => Navigator.pushNamed(context, '/select-theme'),
                   ),
                   const SizedBox(height: 14),
+
                   _SettingItem(
                     title: 'درباره توسعه‌دهنده',
                     icon: Icons.code_rounded,
                     iconBg: const Color(0xFF2ED573),
                     onTap: () => Navigator.pushNamed(context, '/about-dev'),
                   ),
-
                   const SizedBox(height: 14),
+
                   _SettingItem(
                     title: 'خروج از حساب کاربری',
                     icon: Icons.exit_to_app,
                     iconBg: const Color(0xFFE74C3C),
-                    onTap: () {
-                      _showLogoutDialog(context, authController);
-                    },
+                    onTap: () => _showLogoutDialog(context, authController),
                   ),
 
                   const Spacer(),
@@ -78,7 +101,6 @@ class SettingsPage extends StatelessWidget {
           ),
         ),
       ),
-
     );
   }
 
@@ -99,9 +121,7 @@ class SettingsPage extends StatelessWidget {
             Directionality(
               textDirection: TextDirection.rtl,
               child: TextButton(
-                onPressed: () {
-                  Navigator.of(context).pop();
-                },
+                onPressed: () => Navigator.of(context).pop(),
                 child: const Text('خیر'),
               ),
             ),
@@ -115,7 +135,9 @@ class SettingsPage extends StatelessWidget {
                     Navigator.pushReplacementNamed(context, '/welcome');
                   } else {
                     ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('مشکلی در خروج از حساب کاربری پیش آمده')),
+                      const SnackBar(
+                        content: Text('مشکلی در خروج از حساب کاربری پیش آمده'),
+                      ),
                     );
                   }
                 },
@@ -173,15 +195,10 @@ class _SettingItem extends StatelessWidget {
                     height: 28,
                     color: Colors.white,
                   )
-                      : Icon(
-                    icon,
-                    color: Colors.white,
-                    size: 28,
-                  ),
+                      : Icon(icon, color: Colors.white, size: 28),
                 ),
               ),
               const SizedBox(width: 15),
-
               Expanded(
                 child: Align(
                   alignment: Alignment.centerRight,
@@ -199,5 +216,3 @@ class _SettingItem extends StatelessWidget {
     );
   }
 }
-
-
