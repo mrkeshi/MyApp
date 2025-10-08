@@ -3,7 +3,10 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 from django.db.models import Avg, Count, Q
 from drf_spectacular.utils import extend_schema, OpenApiResponse
-from .models import Attraction, AttractionReview
+
+from Province.models import ProvincePhoto
+from Province.serializers import ProvincePhotoSerializer
+from .models import Attraction, AttractionReview, AttractionPhoto  # 👈 اضافه شد
 from .serializers import (
     AttractionSerializer, AttractionPhotoSerializer, AttractionSearchResultSerializer,
     AttractionReviewSerializer, AttractionReviewCreateSerializer
@@ -46,6 +49,54 @@ class AttractionViewSet(mixins.ListModelMixin,
     def photos(self, request, pk=None):
         attraction = self.get_object()
         ser = AttractionPhotoSerializer(attraction.photos.all(), many=True, context={"request": request})
+        return Response(ser.data)
+
+    @extend_schema(
+        tags=["Attractions"],
+        summary="Province photos (standalone)",
+        description="Returns province-level photos (not attraction photos).",
+        responses={200: OpenApiResponse(response=ProvincePhotoSerializer(many=True), description="Province photos")}
+    )
+    @action(
+        detail=False,
+        methods=["get"],
+        url_path=r"province/(?P<province_id>\d+)/province-photos",
+        permission_classes=[permissions.IsAuthenticated],
+    )
+    def province_photos_standalone(self, request, province_id=None):
+        qs = ProvincePhoto.objects.filter(province_id=province_id).order_by("order", "-created_at")
+        page = self.paginate_queryset(qs)
+        if page is not None:
+            ser = ProvincePhotoSerializer(page, many=True, context={"request": request})
+            return self.get_paginated_response(ser.data)
+        ser = ProvincePhotoSerializer(qs, many=True, context={"request": request})
+        return Response(ser.data)
+    @extend_schema(
+        tags=["Attractions"],
+        summary="Province photos",
+        description="Returns photos of all attractions in a province. Staff can access any province; non-staff are limited to their own province.",
+        responses={200: OpenApiResponse(response=AttractionPhotoSerializer(many=True), description="Province gallery")}
+    )
+    @action(
+        detail=False,
+        methods=["get"],
+        url_path=r"province/(?P<province_id>\d+)/photos",
+        permission_classes=[permissions.IsAuthenticated],
+    )
+    def province_photos(self, request, province_id=None):
+        user = request.user
+        if not (user.is_staff or user.is_superuser):
+            if getattr(user, "province_id", None) != int(province_id):
+                return Response(status=status.HTTP_403_FORBIDDEN)
+
+        qs = AttractionPhoto.objects.filter(attraction__province_id=province_id).select_related("attraction")
+
+        page = self.paginate_queryset(qs)
+        if page is not None:
+            ser = AttractionPhotoSerializer(page, many=True, context={"request": request})
+            return self.get_paginated_response(ser.data)
+
+        ser = AttractionPhotoSerializer(qs, many=True, context={"request": request})
         return Response(ser.data)
 
     @extend_schema(

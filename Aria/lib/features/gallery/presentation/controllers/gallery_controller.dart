@@ -18,18 +18,36 @@ class GalleryController extends ChangeNotifier {
   int? _currentProvinceId;
   int? get currentProvinceId => _currentProvinceId;
 
-  Future<void> load(int provinceId) async {
+
+  bool _hasFetchedForCurrentProvince = false;
+
+  Future<void> load(int provinceId, {bool force = false}) async {
+    if (_loading) return;
+
+    if (!force && _hasFetchedForCurrentProvince && _currentProvinceId == provinceId) {
+      return;
+    }
+
     _currentProvinceId = provinceId;
     _loading = true;
     _error = null;
-    _items.clear();
     notifyListeners();
 
     try {
       final data = await repository.getAttractionPhotos(provinceId: provinceId);
-      _items.addAll(data);
-    } catch (e) {
+
+      _items
+        ..clear()
+        ..addAll(data);
+
+      _hasFetchedForCurrentProvince = true;
+      _error = null;
+    } catch (e, st) {
+      if (kDebugMode) {
+        print('❌ GalleryController.load error: $e\n$st');
+      }
       _error = 'خطا در دریافت تصاویر';
+      _hasFetchedForCurrentProvince = false;
     } finally {
       _loading = false;
       notifyListeners();
@@ -37,14 +55,35 @@ class GalleryController extends ChangeNotifier {
   }
 
   Future<void> refresh() async {
-    if (_currentProvinceId == null) return;
+    if (_currentProvinceId == null || _loading) return;
+
     try {
+      _loading = true;
+      notifyListeners();
+
       final data = await repository.getAttractionPhotos(provinceId: _currentProvinceId!);
       _items
         ..clear()
         ..addAll(data);
+
+      _error = null;
+      _hasFetchedForCurrentProvince = true;
+    } catch (e, st) {
+      if (kDebugMode) {
+        print('❌ GalleryController.refresh error: $e\n$st');
+      }
+      _error = 'خطا در دریافت تصاویر';
+    } finally {
+      _loading = false;
       notifyListeners();
-    } catch (_) {
     }
+  }
+
+  void reset() {
+    _items.clear();
+    _error = null;
+    _hasFetchedForCurrentProvince = false;
+    _currentProvinceId = null;
+    notifyListeners();
   }
 }

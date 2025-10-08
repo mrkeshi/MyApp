@@ -1,12 +1,16 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
+import 'package:flutter/services.dart';
 import 'package:photo_view/photo_view.dart';
 import 'package:photo_view/photo_view_gallery.dart';
 import 'package:aria/features/gallery/domain/entities/photo_entity.dart';
 
+import '../../../../core/utils/formatters.dart';
+
 class PhotoViewerPage extends StatefulWidget {
   final List<PhotoEntity> items;
   final int initialIndex;
-  final String? title; // (اختیاری) مثلاً نام استان برای نمایش در AppBar
+  final String? title;
 
   const PhotoViewerPage({
     super.key,
@@ -22,6 +26,15 @@ class PhotoViewerPage extends StatefulWidget {
 class _PhotoViewerPageState extends State<PhotoViewerPage> {
   late PageController _pageController;
   late int _current;
+
+  final _formatter = PersianDigitsFormatter();
+
+  String _formatFa(String text) {
+    final oldValue = const TextEditingValue(text: '');
+    final newValue = TextEditingValue(text: text);
+    final result = _formatter.formatEditUpdate(oldValue, newValue);
+    return result.text;
+  }
 
   @override
   void initState() {
@@ -43,6 +56,10 @@ class _PhotoViewerPageState extends State<PhotoViewerPage> {
   @override
   Widget build(BuildContext context) {
     final items = widget.items;
+    final primary = Theme.of(context).primaryColor;
+
+    final faCount = _formatFa('${_current + 1}/${items.length}');
+    final titleText = widget.title ?? '';
 
     return Scaffold(
       backgroundColor: Colors.black,
@@ -50,13 +67,36 @@ class _PhotoViewerPageState extends State<PhotoViewerPage> {
         backgroundColor: Colors.black,
         foregroundColor: Colors.white,
         centerTitle: true,
+        leading: IconButton(
+          onPressed: () => Navigator.pop(context),
+          icon: SvgPicture.asset(
+            'assets/svg/back_arrow.svg',
+            color: primary,
+            width: 20,
+            height: 20,
+          ),
+        ),
         title: Directionality(
           textDirection: TextDirection.rtl,
-          child: Text(
-            widget.title != null
-                ? '${widget.title} — ${_current + 1}/${items.length}'
-                : '${_current + 1}/${items.length}',
-            style: const TextStyle(fontWeight: FontWeight.w700),
+          child: RichText(
+            textAlign: TextAlign.center,
+            text: TextSpan(
+              style: const TextStyle(
+                fontFamily: 'customy',
+                fontWeight: FontWeight.w700,
+                color: Colors.white,
+              ),
+              children: [
+                if (titleText.isNotEmpty) ...[
+                  TextSpan(text: titleText),
+                  TextSpan(
+                    text: ' - ',
+                    style: TextStyle(color: primary),
+                  ),
+                ],
+                TextSpan(text: faCount),
+              ],
+            ),
           ),
         ),
       ),

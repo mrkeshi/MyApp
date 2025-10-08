@@ -1,5 +1,4 @@
 import 'dart:convert';
-
 import 'package:flutter/material.dart';
 import 'package:aria/core/result/result.dart';
 import 'package:aria/core/utils/validators.dart';
@@ -7,17 +6,25 @@ import 'package:aria/features/auth/domain/repositories/auth_repository.dart';
 import 'package:aria/features/auth/domain/entities/user.dart';
 import 'package:dio/dio.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-
-import '../../../../core/network/dio_client.dart';
-import '../../../province/data/datasource/province_remote.dart';
-import '../../../province/data/repositories/province_repository_impl.dart';
+import 'package:aria/features/province/domain/repositories/province_repository.dart';
+import 'package:aria/features/province/data/datasource/province_remote.dart';
+import 'package:aria/features/province/data/repositories/province_repository_impl.dart';
+import 'package:aria/core/network/dio_client.dart';
+import '../../../province/presentation/controller/province_controller.dart';
 
 enum NextStep { welcome, chooseProvince, editProfile, home }
 
 class AuthController extends ChangeNotifier {
-  AuthController(this._repo);
+  AuthController(
+      this._repo, {
+        required ProvinceController provinceController,
+        ProvinceRepository? provinceRepo,
+      })  : _provinceController = provinceController,
+        _provinceRepo = provinceRepo;
 
   final AuthRepository _repo;
+  final ProvinceRepository? _provinceRepo;
+  final ProvinceController _provinceController;
 
   final TextEditingController phoneController = TextEditingController();
   final TextEditingController otpController = TextEditingController();
@@ -37,26 +44,21 @@ class AuthController extends ChangeNotifier {
   Future<bool> sendCode({bool is_resend = false}) async {
     final raw = phoneController.text;
     final normalized = Validators.normalizePhone(raw);
-
     errorText = Validators.phoneError(normalized);
     if (errorText != null) {
       notifyListeners();
       return false;
     }
-
     isLoading = true;
     errorText = null;
     notifyListeners();
-
     Result<void>? res;
     if (is_resend) {
       res = await _repo.resendCode(normalized);
     } else {
       res = await _repo.requestCode(normalized);
     }
-
     isLoading = false;
-
     final ok = res.when(
       ok: (_) => true,
       err: (f) {
@@ -64,7 +66,6 @@ class AuthController extends ChangeNotifier {
         return false;
       },
     );
-
     notifyListeners();
     return ok;
   }
@@ -74,10 +75,8 @@ class AuthController extends ChangeNotifier {
       isLoading = true;
       errorText = null;
       notifyListeners();
-
       final otp = otpController.text;
       final res = await _repo.verifyCode(phoneController.text, otp);
-
       isLoading = false;
       final success = res.when(
         ok: (_) => true,
@@ -86,7 +85,6 @@ class AuthController extends ChangeNotifier {
           return false;
         },
       );
-
       notifyListeners();
       return success;
     } catch (_) {
@@ -102,9 +100,7 @@ class AuthController extends ChangeNotifier {
       isLoading = true;
       errorText = null;
       notifyListeners();
-
       final result = await _repo.getMe();
-
       isLoading = false;
       final ok = result.when(
         ok: (user) {
@@ -117,7 +113,6 @@ class AuthController extends ChangeNotifier {
           return false;
         },
       );
-
       notifyListeners();
       return ok;
     } catch (_) {
@@ -138,13 +133,11 @@ class AuthController extends ChangeNotifier {
       isLoading = true;
       errorText = null;
       notifyListeners();
-
       final result = await _repo.updateMe(
         firstName: firstName,
         lastName: lastName,
         profileImage: profileImage,
       );
-
       isLoading = false;
       final ok = result.when(
         ok: (user) {
@@ -156,7 +149,6 @@ class AuthController extends ChangeNotifier {
           return false;
         },
       );
-
       notifyListeners();
       return ok;
     } catch (_) {
@@ -172,9 +164,7 @@ class AuthController extends ChangeNotifier {
       isLoading = true;
       errorText = null;
       notifyListeners();
-
       final res = await _repo.logout();
-
       isLoading = false;
       final ok = res.when(
         ok: (_) {
@@ -187,7 +177,6 @@ class AuthController extends ChangeNotifier {
           return false;
         },
       );
-
       notifyListeners();
       return ok;
     } catch (_) {
@@ -201,15 +190,16 @@ class AuthController extends ChangeNotifier {
   Future<String?> verifyThenDecideRoute() async {
     final ok = await verifyCode();
     if (!ok) return null;
-
     final meOk = await loadMe();
     if (!meOk || currentUser == null) return null;
-
-    final hasLastName =
-        (currentUser!.lastName != null &&
-            currentUser!.lastName!.trim().isNotEmpty);
-
+    final hasLastName = (currentUser!.lastName != null && currentUser!.lastName!.trim().isNotEmpty);
     return hasLastName ? '/home' : '/edit-profile';
+  }
+
+  int? _effectiveProvinceId(User u) {
+    final p = u.province;
+    if (p != null && p != 0) return p;
+    return null;
   }
 
   Future<NextStep> resolveNextStep() async {
@@ -220,28 +210,16 @@ class AuthController extends ChangeNotifier {
     Future<NextStep> afterAuth() async {
       final ok = await loadMe();
       if (!ok || currentUser == null) return NextStep.welcome;
-
       final u = currentUser!;
-      final isProvinceMissing = (u.province == null || u.province == 0);
       final isProfileIncomplete =
           (u.firstName == null || u.firstName!.trim().isEmpty) ||
-          (u.lastName == null || u.lastName!.trim().isEmpty);
-
+              (u.lastName == null || u.lastName!.trim().isEmpty);
       if (isProfileIncomplete) return NextStep.editProfile;
-      if (isProvinceMissing) return NextStep.chooseProvince;
-
+      final pid = _effectiveProvinceId(u);
+      if (pid == null) return NextStep.chooseProvince;
       try {
-        final provinceId = u.province;
-        if (provinceId != null && provinceId != 0) {
-          final repo = ProvinceRepositoryImpl(
-            ProvinceRemote(Dio(BaseOptions(baseUrl: 'http://10.0.2.2:8000'))),
-          );
-          await repo.getProvinceDetail(provinceId);
-        }
-      } catch (e) {
-        debugPrint('Failed to fetch province detail: $e');
-      }
-
+        await _provinceController.fetchProvinceDetail(pid);
+      } catch (_) {}
       return NextStep.home;
     }
 
@@ -259,18 +237,13 @@ class AuthController extends ChangeNotifier {
     try {
       final parts = jwt.split('.');
       if (parts.length != 3) return true;
-
       String payload = parts[1].replaceAll('-', '+').replaceAll('_', '/');
       while (payload.length % 4 != 0) {
         payload += '=';
       }
-      final decoded =
-          json.decode(utf8.decode(base64.decode(payload)))
-              as Map<String, dynamic>;
-
+      final decoded = json.decode(utf8.decode(base64.decode(payload))) as Map<String, dynamic>;
       final exp = (decoded['exp'] as num?)?.toInt();
       if (exp == null) return true;
-
       final nowSec = DateTime.now().millisecondsSinceEpoch ~/ 1000;
       return exp <= nowSec;
     } catch (_) {
@@ -278,36 +251,25 @@ class AuthController extends ChangeNotifier {
     }
   }
 
-  Future<bool> _tryRefreshWithPrefs(
-    SharedPreferences prefs,
-    String refreshToken,
-  ) async {
+  Future<bool> _tryRefreshWithPrefs(SharedPreferences prefs, String refreshToken) async {
     try {
-      final baseUrl = const String.fromEnvironment(
-        'API_BASE',
-        defaultValue: 'http://10.0.2.2:8000',
-      );
+      final baseUrl = const String.fromEnvironment('API_BASE', defaultValue: 'http://10.0.2.2:8000');
       final dio = DioClient(baseUrl: baseUrl).dio;
-
       final res = await dio.post(
         '/api/v1/auth/refresh/',
         data: {'refresh': refreshToken},
         options: Options(contentType: Headers.jsonContentType),
       );
-
       if (res.statusCode == 200 && res.data is Map) {
         final map = res.data as Map;
-
         final newAccess = (map['access'] ?? map['access_token']) as String?;
         final newRefresh = (map['refresh'] ?? map['refresh_token']) as String?;
-
         if (newAccess != null && newAccess.isNotEmpty) {
           await prefs.setString('access_token', newAccess);
         }
         if (newRefresh != null && newRefresh.isNotEmpty) {
           await prefs.setString('refresh_token', newRefresh);
         }
-
         return newAccess != null && newAccess.isNotEmpty;
       }
       return false;

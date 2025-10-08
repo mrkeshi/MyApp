@@ -23,3 +23,18 @@ class ProvincePhotoSerializer(serializers.ModelSerializer):
     class Meta:
         model = ProvincePhoto
         fields = ("id", "image", "title", "order", "created_at")
+
+class ProvincePhotoSerializer(serializers.ModelSerializer):
+    image_url = serializers.SerializerMethodField()
+
+    class Meta:
+        model = ProvincePhoto
+        fields = ["id", "title", "order", "created_at", "province_id", "image_url"]
+
+    def get_image_url(self, obj):
+        request = self.context.get("request")
+        value = getattr(obj, "image", None)
+        if not value:
+            return None
+        url = value.url if hasattr(value, "url") else str(value)
+        return request.build_absolute_uri(url) if request else url

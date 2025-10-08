@@ -35,16 +35,17 @@ class PhotoRemoteDataSource {
   Future<List<PhotoModel>> fetchPhotos(int provinceId) async {
     final prefs = await SharedPreferences.getInstance();
     final accessToken = prefs.getString('access_token');
+
     if (accessToken == null || accessToken.isEmpty) {
       throw DioException(
-        requestOptions: RequestOptions(path: '/api/v1/attractions/$provinceId/photos/'),
+        requestOptions: RequestOptions(path: '/api/v1/attractions/province/$provinceId/province-photos/'),
         error: 'توکن دسترسی موجود نیست',
         type: DioExceptionType.unknown,
       );
     }
 
     final res = await dio.get(
-      '/api/v1/attractions/$provinceId/photos/',
+      '/api/v1/attractions/province/$provinceId/province-photos/',
       options: Options(
         headers: {
           'Authorization': 'Bearer $accessToken',
@@ -56,11 +57,21 @@ class PhotoRemoteDataSource {
 
     if (res.statusCode == 200) {
       final data = res.data;
-      if (data is List) {
-        return data.map((e) => PhotoModel.fromJson(Map<String, dynamic>.from(e))).toList();
-      }
-      final list = (data['results'] ?? data['items'] ?? data['data'] ?? []) as List;
-      return list.map((e) => PhotoModel.fromJson(Map<String, dynamic>.from(e))).toList();
+      final list = data is List
+          ? data
+          : (data['results'] ?? data['items'] ?? data['data'] ?? []) as List;
+
+      final models = list.map((e) {
+        final m = Map<String, dynamic>.from(e);
+        final rawUrl = (m['url'] ?? m['image_url'] ?? m['image'] ?? '').toString().trim();
+        if (rawUrl.isNotEmpty) {
+          m['url'] = rawUrl;
+          m['imageUrl'] = rawUrl;
+        }
+        return PhotoModel.fromJson(m);
+      }).toList();
+
+      return models;
     }
 
     final msg = _extractValidationMessage(res.data) ?? 'خطای نامشخص از سرور';
@@ -70,5 +81,19 @@ class PhotoRemoteDataSource {
       error: msg,
       type: DioExceptionType.badResponse,
     );
+  }
+
+  String? _safeUrl(PhotoModel m) {
+    try {
+      final dynamicUrl =
+          (m as dynamic).url ??
+              (m as dynamic).imageUrl ??
+              (m as dynamic).image;
+      if (dynamicUrl == null) return null;
+      final s = dynamicUrl.toString().trim();
+      return s.isEmpty ? null : s;
+    } catch (_) {
+      return null;
+    }
   }
 }

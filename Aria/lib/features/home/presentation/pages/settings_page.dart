@@ -27,30 +27,19 @@ class SettingsPage extends StatelessWidget {
 
                   Row(
                     children: [
-                      const SizedBox(width: 48),
                       Expanded(
                         child: Text(
                           'تنظیمات کاربری',
                           textAlign: TextAlign.center,
                           style: Theme.of(context).textTheme.titleLarge?.copyWith(
                             color: Colors.white,
-                            fontWeight: FontWeight.w700,
+                            fontFamily: 'customy',
+                            fontSize: 17,
+                            fontWeight: FontWeight.w500,
                           ),
                         ),
                       ),
-                      Transform.translate(
-                        offset: const Offset(-12, 0),
-                        child: IconButton(
-                          padding: const EdgeInsets.all(8),
-                          icon: SvgPicture.asset(
-                            'assets/svg/back_arrow.svg',
-                            color: Theme.of(context).primaryColor,
-                            width: 22,
-                            height: 22,
-                          ),
-                          onPressed: () => Navigator.pop(context),
-                        ),
-                      ),
+
                     ],
                   ),
                   const SizedBox(height: 26),

@@ -6,16 +6,20 @@ class PhotoTile extends StatelessWidget {
   final PhotoEntity photo;
   final VoidCallback onTap;
   final double borderRadius;
+  final Offset titleIconOffset;
 
   const PhotoTile({
     super.key,
     required this.photo,
     required this.onTap,
     this.borderRadius = 16,
+    this.titleIconOffset = Offset.zero,
   });
 
   @override
   Widget build(BuildContext context) {
+    final hasLoc = (photo.locationLabel?.trim().isNotEmpty ?? false);
+
     return ClipRRect(
       borderRadius: BorderRadius.circular(borderRadius),
       child: Stack(
@@ -27,60 +31,77 @@ class PhotoTile extends StatelessWidget {
               fit: BoxFit.cover,
               width: double.infinity,
               height: double.infinity,
-              placeholder: (context, _) => Container(
-                color: const Color(0xFF1C1F22),
-              ),
+              placeholder: (context, _) => Container(color: const Color(0xFF1C1F22)),
               errorWidget: (context, _, __) => Container(
                 color: const Color(0xFF303338),
                 child: const Icon(Icons.broken_image, color: Colors.white54),
               ),
             ),
           ),
+          Positioned.fill(child: ColoredBox(color: Colors.black12)),
           Positioned(
             left: 0,
             right: 0,
             bottom: 0,
             child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 4),
               decoration: const BoxDecoration(
                 gradient: LinearGradient(
                   begin: Alignment.bottomCenter,
                   end: Alignment.topCenter,
-                  colors: [
-                    Color(0xAA000000),
-                    Color(0x00000000),
-                  ],
+                  colors: [Color(0xB0000000), Color(0x00000000)],
                 ),
               ),
               child: Row(
                 children: [
                   Expanded(
-                    child: Text(
-                      photo.title ?? '',
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
                       textDirection: TextDirection.rtl,
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 12,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                  ),
-                  if (photo.locationLabel != null)
-                    Row(
                       children: [
-                        const Icon(Icons.place, size: 14, color: Colors.white70),
-                        const SizedBox(width: 4),
-                        Text(
-                          photo.locationLabel!,
-                          textDirection: TextDirection.rtl,
-                          style: const TextStyle(
-                            color: Colors.white70,
-                            fontSize: 11,
+                        Transform.translate(
+                          offset: const Offset(0, -2),
+                          child: const Icon(Icons.place_outlined, size: 14, color: Colors.white),
+                        ),
+                        const SizedBox(width: 2),
+                        Flexible(
+                          child: Text(
+                            photo.title ?? '',
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            textDirection: TextDirection.rtl,
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 11,
+                              fontWeight: FontWeight.w600,
+                            ),
                           ),
                         ),
                       ],
+                    ),
+                  ),
+                  if (hasLoc)
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                      decoration: BoxDecoration(
+                        color: Colors.black45,
+                        borderRadius: BorderRadius.circular(999),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          const Icon(Icons.location_on, size: 13, color: Colors.white70),
+                          const SizedBox(width: 4),
+                          Text(
+                            photo.locationLabel!,
+                            textDirection: TextDirection.rtl,
+                            style: const TextStyle(
+                              color: Colors.white70,
+                              fontSize: 11,
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
                 ],
               ),
