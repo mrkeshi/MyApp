@@ -41,7 +41,9 @@ dependencies:
   flutter_staggered_grid_view: ^0.7.0
   photo_view: ^0.14.0
   xml: ^6.5.0
+  audioplayers: ^6.5.1
   internet_connection_checker_plus: ^2.9.0
+
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
   cupertino_icons: ^1.0.8
@@ -76,6 +78,7 @@ flutter:
     - assets/fonts/
     - assets/images/theme/
     - assets/svg/
+    - assets/audio/background_music.mp3
   fonts:
     - family: Customy
       fonts:

@@ -19,6 +19,7 @@ import 'package:aria/features/gallery/domain/repositories/photo_repository.dart'
 
 
 import '../features/gallery/presentation/controllers/gallery_controller.dart';
+import '../features/home/presentation/controller/audio_controller.dart';
 
 class AppDI {
   static DioClient buildDioClient() {
@@ -60,6 +61,10 @@ class AppDI {
       ChangeNotifierProvider<GalleryController>(
         create: (ctx) => GalleryController(ctx.read<PhotoRepository>()),
       ),
+
+      ChangeNotifierProvider<AudioController>(
+        create: (_) => AudioController(),
+      ),
     ];
   }
-}
+  }
