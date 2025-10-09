@@ -19,7 +19,7 @@ class Attraction(models.Model):
     description = models.TextField()
     registration_cost = models.DecimalField(max_digits=12, decimal_places=2, null=True, blank=True)
     discount_code = models.CharField(max_length=50, blank=True, default="")
-    venue = models.CharField(max_length=255)  # محل/آدرس
+    venue = models.CharField(max_length=255)
     latitude = models.DecimalField(max_digits=9, decimal_places=6, null=True, blank=True)
     longitude = models.DecimalField(max_digits=9, decimal_places=6, null=True, blank=True)
     cover_image = models.ImageField(upload_to=attraction_cover_upload_path, null=True, blank=True)

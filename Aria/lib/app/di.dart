@@ -16,14 +16,20 @@ import 'package:aria/features/province/data/datasource/province_remote.dart';
 import 'package:aria/features/gallery/data/datasources/photo_remote_data_source.dart';
 import 'package:aria/features/gallery/data/repositories/photo_repository_impl.dart';
 import 'package:aria/features/gallery/domain/repositories/photo_repository.dart';
-
-
+import '../features/attractions/data/datasources/attraction_remote_data_source.dart';
+import '../features/attractions/data/repositories/attraction_repository_impl.dart';
+import '../features/attractions/domain/repositories/attraction_repository.dart';
+import '../features/attractions/presentation/controller/attractions_controller.dart';
 import '../features/gallery/presentation/controllers/gallery_controller.dart';
+
 import '../features/home/presentation/controller/audio_controller.dart';
+
+
 
 class AppDI {
   static DioClient buildDioClient() {
-    const baseUrl = String.fromEnvironment('API_BASE', defaultValue: 'http://10.0.2.2:8000');
+    const baseUrl =
+    String.fromEnvironment('API_BASE', defaultValue: 'http://10.0.2.2:8000');
     return DioClient(baseUrl: baseUrl);
   }
 
@@ -35,15 +41,21 @@ class AppDI {
     final AuthRepository authRepo = AuthRepositoryImpl(authRemote);
 
     final provinceRemote = ProvinceRemote(dio);
-    final ProvinceRepository provinceRepo = ProvinceRepositoryImpl(provinceRemote);
+    final ProvinceRepository provinceRepo =
+    ProvinceRepositoryImpl(provinceRemote);
 
     final photoRemote = PhotoRemoteDataSource(dio);
     final PhotoRepository photoRepo = PhotoRepositoryImpl(photoRemote);
+
+    final attractionRemote = AttractionRemoteDataSource(dio);
+    final AttractionRepository attractionRepo =
+    AttractionRepositoryImpl(attractionRemote);
 
     return [
       Provider<AuthRepository>.value(value: authRepo),
       Provider<ProvinceRepository>.value(value: provinceRepo),
       Provider<PhotoRepository>.value(value: photoRepo),
+      Provider<AttractionRepository>.value(value: attractionRepo),
 
       ChangeNotifierProvider<ProvinceController>(
         create: (_) => ProvinceController(provinceRepo),
@@ -65,6 +77,10 @@ class AppDI {
       ChangeNotifierProvider<AudioController>(
         create: (_) => AudioController(),
       ),
+
+      ChangeNotifierProvider<AttractionsController>(
+        create: (ctx) => AttractionsController(attractionRepo),
+      ),
     ];
   }
-  }
+}

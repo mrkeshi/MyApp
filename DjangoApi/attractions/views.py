@@ -172,18 +172,21 @@ class AttractionViewSet(mixins.ListModelMixin,
     @action(
         detail=False,
         methods=["get"],
-        url_path=r"province/(?P<province_id>\d+)/top-attractions",
-        permission_classes=[permissions.IsAuthenticated],
+        url_path="top-attractions",
     )
-    def top_attractions(self, request, province_id=None):
+    def top_attractions(self, request):
+        province_id = request.query_params.get("province_id")
+        if province_id is None:
+            return Response({"detail": "province_id required"}, status=400)
+
         user = request.user
         if not (user.is_staff or user.is_superuser):
             if getattr(user, "province_id", None) != int(province_id):
-                return Response(status=status.HTTP_403_FORBIDDEN)
+                return Response(status=403)
 
         qs = Attraction.objects.filter(province_id=province_id).annotate(
             average_rating=Avg("reviews__rating")
-        ).order_by('-average_rating')[:3]  
+        ).order_by('-average_rating')[:3]
 
         ser = AttractionSerializer(qs, many=True, context={"request": request})
         return Response(ser.data)

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-
+import '../../../attractions/presentation/widget/AttractionSlider.dart';
 import '../widgets/header_widget.dart';
 
 class HomePage extends StatelessWidget {
@@ -16,6 +16,13 @@ class HomePage extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             const HeaderWidget(),
+
+            const SizedBox(height: 5),
+
+            const Padding(
+              padding: EdgeInsets.symmetric(horizontal: 16),
+              child: AttractionSlider(),
+            ),
 
             const SizedBox(height: 20),
 
@@ -44,3 +51,4 @@ class HomePage extends StatelessWidget {
     );
   }
 }
+
