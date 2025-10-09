@@ -163,3 +163,27 @@ class AttractionViewSet(mixins.ListModelMixin,
             return self.get_paginated_response(ser.data)
         ser = AttractionSearchResultSerializer(qs, many=True, context={"request": request})
         return Response(ser.data)
+    @extend_schema(
+        tags=["Attractions"],
+        summary="Top 3 attractions of a province by rating",
+        description="Returns top 3 attractions of the specified province, ordered by average rating. Staff can access any province; non-staff are limited to their own province.",
+        responses={200: OpenApiResponse(response=AttractionSerializer(many=True), description="Top 3 attractions")}
+    )
+    @action(
+        detail=False,
+        methods=["get"],
+        url_path=r"province/(?P<province_id>\d+)/top-attractions",
+        permission_classes=[permissions.IsAuthenticated],
+    )
+    def top_attractions(self, request, province_id=None):
+        user = request.user
+        if not (user.is_staff or user.is_superuser):
+            if getattr(user, "province_id", None) != int(province_id):
+                return Response(status=status.HTTP_403_FORBIDDEN)
+
+        qs = Attraction.objects.filter(province_id=province_id).annotate(
+            average_rating=Avg("reviews__rating")
+        ).order_by('-average_rating')[:3]  
+
+        ser = AttractionSerializer(qs, many=True, context={"request": request})
+        return Response(ser.data)
