@@ -79,7 +79,7 @@ class _LoginPageState extends State<LoginPage> {
                         textDirection: TextDirection.ltr,
                         textAlign: TextAlign.left,
                         decoration: InputDecoration(
-                          hintText: '****۰۹۹۰۷۸۸',
+                          hintText: '۰۹۱۲۳۴۵۶۷۸۹',
                           hintTextDirection: TextDirection.rtl,
                           alignLabelWithHint: true,
                           filled: true,

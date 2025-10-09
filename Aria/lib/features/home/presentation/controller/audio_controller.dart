@@ -14,8 +14,8 @@ class AudioController with ChangeNotifier {
   }
 
   Future<void> _playMusic() async {
-    await _audioPlayer.setReleaseMode(ReleaseMode.loop);
-    await _audioPlayer.play(AssetSource('audio/background_music.mp3'));
+    // await _audioPlayer.setReleaseMode(ReleaseMode.loop);
+    // await _audioPlayer.play(AssetSource('audio/background_music.mp3'));
     _isPlaying = true;
     notifyListeners();
   }

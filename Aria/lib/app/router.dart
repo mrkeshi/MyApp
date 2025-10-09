@@ -10,6 +10,7 @@ import '../features/auth/presentation/pages/otp_page.dart';
 import '../features/home/presentation/pages/about-dev_page.dart';
 import '../features/home/presentation/pages/home_screen.dart';
 import '../features/home/presentation/pages/theme_select_page.dart';
+import '../features/province/presentation/pages/about_provice.dart';
 
 
 class AppRouter {
@@ -35,6 +36,10 @@ class AppRouter {
         return MaterialPageRoute(builder: (_) => AboutDeveloperPage());
       case '/choose-province':
         return MaterialPageRoute(builder: (_) => IranMapScreen());
+      case '/about-province':
+        return MaterialPageRoute(builder: (_) => ProvincePage());
+
+
       case '/otp': {
         final args = settings.arguments;
         String phone = '';

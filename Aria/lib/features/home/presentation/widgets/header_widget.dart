@@ -36,22 +36,10 @@ class HeaderWidget extends StatelessWidget {
               Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Container(
-                    padding: const EdgeInsets.all(2),
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      border: Border.all(
-                        color: theme.colorScheme.primary,
-                        width: 2,
-                      ),
-                    ),
-                    child: CircleAvatar(
-                      radius: 22,
-                      backgroundImage: user?.profileImage != null
-                          ? NetworkImage(user!.profileImage!)
-                          : const AssetImage('assets/images/profile.png')
-                      as ImageProvider,
-                    ),
+                  AnimatedCircleAvatar(
+                    imageUrl: user?.profileImage,
+                    radius: 22,
+                    borderColor: theme.colorScheme.primary,
                   ),
                   const SizedBox(width: 10),
                   Column(
@@ -93,6 +81,78 @@ class HeaderWidget extends StatelessWidget {
             ],
           ),
         ),
+      ),
+    );
+  }
+}
+
+// -------------------------
+// Animated Skeleton CircleAvatar
+// -------------------------
+class AnimatedCircleAvatar extends StatefulWidget {
+  final String? imageUrl;
+  final double radius;
+  final Color borderColor;
+
+  const AnimatedCircleAvatar({
+    super.key,
+    this.imageUrl,
+    this.radius = 22,
+    required this.borderColor,
+  });
+
+  @override
+  State<AnimatedCircleAvatar> createState() => _AnimatedCircleAvatarState();
+}
+
+class _AnimatedCircleAvatarState extends State<AnimatedCircleAvatar>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _controller;
+  late Animation<double> _animation;
+
+  @override
+  void initState() {
+    super.initState();
+
+    _controller = AnimationController(
+      vsync: this,
+      duration: const Duration(seconds: 1),
+    )..repeat(reverse: true);
+
+    _animation = Tween<double>(begin: 0.3, end: 1.0).animate(
+      CurvedAnimation(parent: _controller, curve: Curves.easeInOut),
+    );
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(2),
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        border: Border.all(color: widget.borderColor, width: 2),
+      ),
+      child: widget.imageUrl != null
+          ? CircleAvatar(
+        radius: widget.radius,
+        backgroundImage: NetworkImage(widget.imageUrl!),
+      )
+          : AnimatedBuilder(
+        animation: _animation,
+        builder: (context, child) {
+          return CircleAvatar(
+            radius: widget.radius,
+            backgroundColor:
+            Colors.grey.shade700.withOpacity(_animation.value),
+            child: const Icon(Icons.person, color: Colors.white54, size: 24),
+          );
+        },
       ),
     );
   }
