@@ -59,4 +59,12 @@ class ProvinceController extends ChangeNotifier {
       notifyListeners();
     }
   }
+  Future<void> ensureProvinceFromUser(int? userProvinceId) async {
+    if (province == null && userProvinceId != null) {
+      await fetchProvinceDetail(userProvinceId);
+    }
+  }
+
+
+
 }

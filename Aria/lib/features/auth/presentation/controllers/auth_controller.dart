@@ -100,8 +100,10 @@ class AuthController extends ChangeNotifier {
       isLoading = true;
       errorText = null;
       notifyListeners();
+
       final result = await _repo.getMe();
       isLoading = false;
+
       final ok = result.when(
         ok: (user) {
           currentUser = user;
@@ -113,6 +115,11 @@ class AuthController extends ChangeNotifier {
           return false;
         },
       );
+
+      if (currentUser?.province != null) {
+        await _provinceController.ensureProvinceFromUser(currentUser!.province);
+      }
+
       notifyListeners();
       return ok;
     } catch (_) {
@@ -123,6 +130,7 @@ class AuthController extends ChangeNotifier {
       return false;
     }
   }
+
 
   Future<bool> updateProfile({
     String? firstName,
