@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import '../../../attractions/presentation/widget/AttractionSlider.dart';
+import '../../../attractions/presentation/widget/local_events_grid.dart.dart';
 import '../widgets/header_widget.dart';
+import '../widgets/attraction_box_grid.dart';
 
 class HomePage extends StatelessWidget {
   const HomePage({super.key});
@@ -12,43 +14,62 @@ class HomePage extends StatelessWidget {
     return Scaffold(
       backgroundColor: theme.colorScheme.background,
       body: SafeArea(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            const HeaderWidget(),
+        child: SingleChildScrollView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              const HeaderWidget(),
+              const SizedBox(height: 0),
 
-            const SizedBox(height: 5),
+              const Padding(
+                padding: EdgeInsets.symmetric(horizontal: 16),
+                child: AttractionSlider(),
+              ),
 
-            const Padding(
-              padding: EdgeInsets.symmetric(horizontal: 16),
-              child: AttractionSlider(),
-            ),
+              const SizedBox(height: 12),
 
-            const SizedBox(height: 20),
+              const Padding(
+                padding: EdgeInsets.symmetric(horizontal: 0),
+                child: AttractionBoxGrid(),
+              ),
 
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              child: ElevatedButton(
-                onPressed: () {
-                  Navigator.pushNamed(context, '/about-province');
-                },
-                style: ElevatedButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                  backgroundColor: theme.primaryColor,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
+              const SizedBox(height: 0),
+
+              const Padding(
+                padding: EdgeInsets.symmetric(horizontal: 16),
+                child: LocalEventsGrid(),
+              ),
+
+              const SizedBox(height: 24),
+
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                child: ElevatedButton(
+                  onPressed: () {
+                    Navigator.pushNamed(context, '/about-province');
+                  },
+                  style: ElevatedButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(vertical: 12),
+                    backgroundColor: theme.primaryColor,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
+                  child: const Text(
+                    'رفتن به صفحه استان',
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                 ),
-                child: const Text(
-                  'رفتن به صفحه استان',
-                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                ),
               ),
-            ),
-          ],
+
+              const SizedBox(height: 30),
+            ],
+          ),
         ),
       ),
     );
   }
 }
-

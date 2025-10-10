@@ -49,7 +49,7 @@ class _AttractionSliderState extends State<AttractionSlider> {
         ClipRRect(
           borderRadius: BorderRadius.circular(8),
           child: SizedBox(
-            height: 220,
+            height: 190,
             child: PageView.builder(
               controller: _pageController,
               physics: const BouncingScrollPhysics(),
@@ -75,7 +75,7 @@ class _AttractionSliderState extends State<AttractionSlider> {
                     );
                   },
                   child: Container(
-                    margin: const EdgeInsets.symmetric(horizontal: 4, vertical: 0),
+                    margin: const EdgeInsets.symmetric(horizontal: 2, vertical: 0),
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(8),
                       boxShadow: [
@@ -127,7 +127,7 @@ class _AttractionSliderState extends State<AttractionSlider> {
                               style: ElevatedButton.styleFrom(
                                 backgroundColor: Theme.of(context).primaryColor,
                                 padding: const EdgeInsets.symmetric(
-                                    horizontal: 14, vertical: 0),
+                                    horizontal: 8, vertical: 0),
                                 shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(10),
                                 ),
@@ -139,8 +139,8 @@ class _AttractionSliderState extends State<AttractionSlider> {
                                 'بزن بریم',
                                 style: TextStyle(
                                   color: AppColors.black,
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 14,
+                                  fontWeight: FontWeight.w800,
+                                  fontSize: 12,
                                 ),
                               ),
                             ),
