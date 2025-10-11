@@ -12,7 +12,7 @@ class AttractionSlider extends StatefulWidget {
 }
 
 class _AttractionSliderState extends State<AttractionSlider> {
-  final PageController _pageController = PageController(viewportFraction:1);
+  final PageController _pageController = PageController(viewportFraction: 1);
   int _currentIndex = 0;
   bool _initialized = false;
 
@@ -22,26 +22,37 @@ class _AttractionSliderState extends State<AttractionSlider> {
     if (!_initialized) {
       final controller = context.read<AttractionsController>();
       final provinceId = context.read<ProvinceController>().province?.id;
-      controller.load(provinceId as int);
-      _initialized = true;
+      if (provinceId != null) {
+        controller.loadTop3(provinceId);
+        _initialized = true;
+      }
     }
   }
 
   @override
   Widget build(BuildContext context) {
     final controller = context.watch<AttractionsController>();
-    final attractions = controller.items;
+    final attractions = controller.top3Items;
 
     if (controller.loading) {
-      return const Center(child: CircularProgressIndicator());
+      return const SizedBox(
+        height: 180,
+        child: Center(child: CircularProgressIndicator()),
+      );
     }
 
     if (controller.error != null) {
-      return Center(child: Text(controller.error!));
+      return SizedBox(
+        height: 180,
+        child: Center(child: Text(controller.error!)),
+      );
     }
 
     if (attractions.isEmpty) {
-      return const Center(child: Text('هیچ جاذبه‌ای موجود نیست'));
+      return const SizedBox(
+        height: 180,
+        child: Center(child: Text('هیچ جاذبه‌ای موجود نیست')),
+      );
     }
 
     return Column(
@@ -49,7 +60,7 @@ class _AttractionSliderState extends State<AttractionSlider> {
         ClipRRect(
           borderRadius: BorderRadius.circular(8),
           child: SizedBox(
-            height: 190,
+            height: 180, 
             child: PageView.builder(
               controller: _pageController,
               physics: const BouncingScrollPhysics(),
@@ -59,94 +70,69 @@ class _AttractionSliderState extends State<AttractionSlider> {
               },
               itemBuilder: (context, index) {
                 final attraction = attractions[index];
-                double scale = 1.0;
 
-                if (_pageController.position.haveDimensions) {
-                  scale = (_pageController.page! - index).abs();
-                  scale = 1 - (scale * 0.07).clamp(0.0, 0.07);
-                }
-
-                return AnimatedBuilder(
-                  animation: _pageController,
-                  builder: (context, child) {
-                    return Transform.scale(
-                      scale: scale,
-                      child: child,
-                    );
-                  },
-                  child: Container(
-                    margin: const EdgeInsets.symmetric(horizontal: 2, vertical: 0),
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(8),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withOpacity(0.2),
-                          blurRadius: 8,
-                          offset: const Offset(0, 2),
+                return Container(
+                  margin: const EdgeInsets.symmetric(horizontal: 6),
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(12),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.2),
+                        blurRadius: 8,
+                        offset: const Offset(0, 2),
+                      ),
+                    ],
+                  ),
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(20),
+                    child: Stack(
+                      fit: StackFit.expand,
+                      children: [
+                        Image.network(
+                          attraction.coverImage,
+                          fit: BoxFit.cover,
+                          errorBuilder: (_, __, ___) =>
+                          const Center(child: Icon(Icons.broken_image)),
+                        ),
+                        Container(
+                          decoration: BoxDecoration(
+                            gradient: LinearGradient(
+                              begin: Alignment.bottomCenter,
+                              end: Alignment.center,
+                              colors: [
+                                Colors.black.withOpacity(0.5),
+                                Colors.transparent,
+                              ],
+                            ),
+                          ),
+                        ),
+                        Positioned(
+                          bottom: 8,
+                          left: 12,
+                          child: ElevatedButton(
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Theme.of(context).primaryColor,
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 8,
+                              ),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                            ),
+                            onPressed: () {
+                              // TODO: رفتن به صفحه جزئیات
+                            },
+                            child: const Text(
+                              'بزن بریم',
+                              style: TextStyle(
+                                color: AppColors.black,
+                                fontWeight: FontWeight.w800,
+                                fontSize: 10,
+                              ),
+                            ),
+                          ),
                         ),
                       ],
-                    ),
-                    child: ClipRRect(
-                      borderRadius: BorderRadius.circular(20),
-                      child: Stack(
-                        fit: StackFit.expand,
-                        children: [
-                          Image.network(
-                            attraction.coverImage,
-                            fit: BoxFit.cover,
-                            loadingBuilder: (context, child, progress) {
-                              if (progress == null) return child;
-                              return Container(
-                                color: Colors.grey.shade300,
-                                child: const Center(
-                                  child: CircularProgressIndicator(strokeWidth: 2),
-                                ),
-                              );
-                            },
-                            errorBuilder: (_, __, ___) =>
-                            const Center(child: Icon(Icons.broken_image)),
-                          ),
-
-                          Container(
-                            decoration: BoxDecoration(
-                              gradient: LinearGradient(
-                                begin: Alignment.bottomCenter,
-                                end: Alignment.center,
-                                colors: [
-                                  Colors.black.withOpacity(0.5),
-                                  Colors.transparent,
-                                ],
-                              ),
-                            ),
-                          ),
-
-                          Positioned(
-                            bottom: 6,
-                            left: 12,
-                            child: ElevatedButton(
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: Theme.of(context).primaryColor,
-                                padding: const EdgeInsets.symmetric(
-                                    horizontal: 8, vertical: 0),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(10),
-                                ),
-                              ),
-                              onPressed: () {
-                                // TODO: مسیر رفتن به جزئیات
-                              },
-                              child: const Text(
-                                'بزن بریم',
-                                style: TextStyle(
-                                  color: AppColors.black,
-                                  fontWeight: FontWeight.w800,
-                                  fontSize: 12,
-                                ),
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
                     ),
                   ),
                 );
@@ -154,10 +140,7 @@ class _AttractionSliderState extends State<AttractionSlider> {
             ),
           ),
         ),
-
-        const SizedBox(height: 14),
-
-
+        const SizedBox(height: 10),
         Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: List.generate(
@@ -168,7 +151,9 @@ class _AttractionSliderState extends State<AttractionSlider> {
               width: _currentIndex == i ? 16 : 10,
               height: 3,
               decoration: BoxDecoration(
-                color: _currentIndex == i ? Theme.of(context).primaryColor : Colors.grey.shade400,
+                color: _currentIndex == i
+                    ? Theme.of(context).primaryColor
+                    : Colors.grey.shade400,
                 borderRadius: BorderRadius.circular(2),
               ),
             ),

@@ -30,7 +30,7 @@ class AttractionBoxGrid extends StatelessWidget {
         'title': 'جاذبه‌های\nگردشگری',
         'icon': 'assets/images/icons/2.png',
         'isNew': false,
-        'route': null,
+        'route': '/province-attractions',
       },
     ];
 

@@ -4,6 +4,7 @@ import 'package:aria/features/home/presentation/pages/settings_screen.dart';
 import 'package:aria/features/home/presentation/pages/welcome_Screen.dart';
 import 'package:aria/features/province/presentation/pages/select_province_page.dart';
 import 'package:flutter/material.dart';
+import '../features/attractions/presentation/pages/province_attractions_page.dart';
 import '../features/auth/presentation/pages/edit_profile_page.dart';
 import '../features/auth/presentation/pages/login_page.dart';
 import '../features/auth/presentation/pages/otp_page.dart';
@@ -38,7 +39,8 @@ class AppRouter {
         return MaterialPageRoute(builder: (_) => IranMapScreen());
       case '/about-province':
         return MaterialPageRoute(builder: (_) => ProvincePage());
-
+      case '/province-attractions':
+        return MaterialPageRoute(builder: (_) => const ProvinceAttractionsPage());
 
       case '/otp': {
         final args = settings.arguments;

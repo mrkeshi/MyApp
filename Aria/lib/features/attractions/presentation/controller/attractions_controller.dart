@@ -1,5 +1,7 @@
 import 'package:flutter/foundation.dart';
 import '../../domain/entities/attraction.dart';
+import '../../domain/entities/attraction_detail.dart';
+import '../../domain/entities/attraction_search_result.dart';
 import '../../domain/repositories/attraction_repository.dart';
 
 class AttractionsController extends ChangeNotifier {
@@ -7,8 +9,17 @@ class AttractionsController extends ChangeNotifier {
 
   AttractionsController(this.repository);
 
-  final List<Attraction> _items = [];
-  List<Attraction> get items => List.unmodifiable(_items);
+  final List<Attraction> _top3Items = [];
+  List<Attraction> get top3Items => List.unmodifiable(_top3Items);
+
+  final List<Attraction> _top10Items = [];
+  List<Attraction> get top10Items => List.unmodifiable(_top10Items);
+
+  final List<Attraction> _allItems = [];
+  List<Attraction> get allItems => List.unmodifiable(_allItems);
+
+  final List<AttractionSearchResult> _searchItems = [];
+  List<AttractionSearchResult> get searchItems => List.unmodifiable(_searchItems);
 
   bool _loading = false;
   bool get loading => _loading;
@@ -19,14 +30,12 @@ class AttractionsController extends ChangeNotifier {
   int? _currentProvinceId;
   int? get currentProvinceId => _currentProvinceId;
 
-  bool _hasFetchedForCurrentProvince = false;
+  bool _hasFetchedTop3 = false;
+  bool _hasFetchedAll = false;
 
-  Future<void> load(int provinceId, {bool force = false}) async {
+  Future<void> loadTop3(int provinceId, {bool force = false}) async {
     if (_loading) return;
-
-    if (!force && _hasFetchedForCurrentProvince && _currentProvinceId == provinceId) {
-      return;
-    }
+    if (!force && _hasFetchedTop3 && _currentProvinceId == provinceId) return;
 
     _currentProvinceId = provinceId;
     _loading = true;
@@ -35,40 +44,100 @@ class AttractionsController extends ChangeNotifier {
 
     try {
       final data = await repository.get3TopAttractions(provinceId);
-      print("fetch if");
-      _items
+      _top3Items
         ..clear()
         ..addAll(data);
-      _hasFetchedForCurrentProvince = true;
+      _hasFetchedTop3 = true;
     } catch (e, st) {
-      if (kDebugMode) print('❌ AttractionsController.load error: $e\n$st');
+      if (kDebugMode) print('❌ loadTop3 error: $e\n$st');
       _error = 'خطا در دریافت جاذبه‌ها';
-      _hasFetchedForCurrentProvince = false;
+      _hasFetchedTop3 = false;
     } finally {
       _loading = false;
       notifyListeners();
     }
   }
 
-  Future<void> refresh() async {
+  Future<void> refreshTop3() async {
     if (_currentProvinceId == null || _loading) return;
+    await loadTop3(_currentProvinceId!, force: true);
+  }
+
+  Future<void> loadTop10(int provinceId, {bool force = false}) async {
+    if (_loading) return;
+    if (!force && _top10Items.isNotEmpty && _currentProvinceId == provinceId) return;
+
+    _loading = true;
+    _error = null;
+    notifyListeners();
 
     try {
-      _loading = true;
-      notifyListeners();
-
-      final data = await repository.get3TopAttractions(_currentProvinceId!);
-      _items
+      final data = await repository.get10TopAttractions(provinceId);
+      _top10Items
         ..clear()
         ..addAll(data);
-      _error = null;
-      _hasFetchedForCurrentProvince = true;
     } catch (e, st) {
-      if (kDebugMode) print('❌ AttractionsController.refresh error: $e\n$st');
+      if (kDebugMode) print('❌ loadTop10 error: $e\n$st');
       _error = 'خطا در دریافت جاذبه‌ها';
     } finally {
       _loading = false;
       notifyListeners();
+    }
+  }
+
+  Future<void> loadAllAttractions(int provinceId, {bool force = false}) async {
+    if (_loading) return;
+    if (!force && _hasFetchedAll && _currentProvinceId == provinceId) return;
+
+    _currentProvinceId = provinceId;
+    _loading = true;
+    _error = null;
+    notifyListeners();
+
+    try {
+      final data = await repository.getAttractions();
+      _allItems
+        ..clear()
+        ..addAll(data);
+      _hasFetchedAll = true;
+    } catch (e, st) {
+      if (kDebugMode) print('❌ loadAllAttractions error: $e\n$st');
+      _error = 'خطا در دریافت جاذبه‌ها';
+      _hasFetchedAll = false;
+    } finally {
+      _loading = false;
+      notifyListeners();
+    }
+  }
+
+  Future<void> search(String query) async {
+    _loading = true;
+    _error = null;
+    notifyListeners();
+
+    try {
+      final data = await repository.searchAttractions(query);
+      _searchItems
+        ..clear()
+        ..addAll(data);
+    } catch (e, st) {
+      if (kDebugMode) print('❌ search error: $e\n$st');
+      _error = 'خطا در جستجوی جاذبه‌ها';
+      _searchItems.clear();
+    } finally {
+      _loading = false;
+      notifyListeners();
+    }
+  }
+
+  Future<AttractionDetail?> getDetail(int id) async {
+    try {
+      return await repository.getAttractionDetail(id);
+    } catch (e, st) {
+      if (kDebugMode) print('❌ getDetail error: $e\n$st');
+      _error = 'خطا در دریافت جزئیات جاذبه';
+      notifyListeners();
+      return null;
     }
   }
 }

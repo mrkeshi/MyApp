@@ -9,7 +9,7 @@ from Province.serializers import ProvincePhotoSerializer
 from .models import Attraction, AttractionReview, AttractionPhoto  # 👈 اضافه شد
 from .serializers import (
     AttractionSerializer, AttractionPhotoSerializer, AttractionSearchResultSerializer,
-    AttractionReviewSerializer, AttractionReviewCreateSerializer
+    AttractionReviewSerializer, AttractionReviewCreateSerializer, AttractionDetailSerializer
 )
 
 @extend_schema(
@@ -36,9 +36,15 @@ class AttractionViewSet(mixins.ListModelMixin,
             return qs.filter(province_id=user.province_id)
         return qs.none()
 
-    @extend_schema(tags=["Attractions"], summary="Retrieve attraction (user's province only)", responses={200: AttractionSerializer})
+    @extend_schema(
+        tags=["Attractions"],
+        summary="Retrieve attraction (with photos and reviews)",
+        responses={200: AttractionDetailSerializer}
+    )
     def retrieve(self, request, *args, **kwargs):
-        return super().retrieve(request, *args, **kwargs)
+        instance = self.get_object()
+        serializer = AttractionDetailSerializer(instance, context={"request": request})
+        return Response(serializer.data)
 
     @extend_schema(
         tags=["Attractions"],
@@ -187,6 +193,34 @@ class AttractionViewSet(mixins.ListModelMixin,
         qs = Attraction.objects.filter(province_id=province_id).annotate(
             average_rating=Avg("reviews__rating")
         ).order_by('-average_rating')[:3]
+
+        ser = AttractionSerializer(qs, many=True, context={"request": request})
+        return Response(ser.data)
+
+    @extend_schema(
+        tags=["Attractions"],
+        summary="Top 10 attractions of a province by rating",
+        description="Returns top 10 attractions of the specified province, ordered by average rating. Staff can access any province; non-staff are limited to their own province.",
+        responses={200: OpenApiResponse(response=AttractionSerializer(many=True), description="Top 10 attractions")}
+    )
+    @action(
+        detail=False,
+        methods=["get"],
+        url_path="top-10-attractions",
+    )
+    def top_10_attractions(self, request):
+        province_id = request.query_params.get("province_id")
+        if province_id is None:
+            return Response({"detail": "province_id required"}, status=400)
+
+        user = request.user
+        if not (user.is_staff or user.is_superuser):
+            if getattr(user, "province_id", None) != int(province_id):
+                return Response(status=403)
+
+        qs = Attraction.objects.filter(province_id=province_id).annotate(
+            average_rating=Avg("reviews__rating")
+        ).order_by('-average_rating')[:10]
 
         ser = AttractionSerializer(qs, many=True, context={"request": request})
         return Response(ser.data)

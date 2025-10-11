@@ -299,6 +299,7 @@ class _LocalEventBoxRight extends StatelessWidget {
                             ),
                             textAlign: TextAlign.center,
                           ),
+                          const SizedBox(height: 4),
                           Text(
                             subtitle,
                             style: const TextStyle(
@@ -311,7 +312,7 @@ class _LocalEventBoxRight extends StatelessWidget {
                         ],
                       ),
                     ),
-                    const SizedBox(height: 6),
+                    const SizedBox(height: 2),
                     Transform.translate(
                       offset: Offset(0, 13),
                       child: Image.asset(

@@ -72,3 +72,10 @@ class AttractionSearchResultSerializer(serializers.ModelSerializer):
             return obj.cover_image.name.split("/")[-1] if obj.cover_image and obj.cover_image.name else None
         except Exception:
             return None
+
+class AttractionDetailSerializer(AttractionSerializer):
+    photos = AttractionPhotoSerializer(many=True, read_only=True)
+    reviews = AttractionReviewSerializer(many=True, read_only=True)
+
+    class Meta(AttractionSerializer.Meta):
+        fields = AttractionSerializer.Meta.fields + ("photos", "reviews",)
