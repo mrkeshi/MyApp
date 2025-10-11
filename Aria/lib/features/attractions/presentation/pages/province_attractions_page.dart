@@ -201,9 +201,18 @@ class _ProvinceAttractionsPageState extends State<ProvinceAttractionsPage> with 
                 child: Consumer<AttractionsController>(
                   builder: (_, controller, __) {
                     if (_mode == _SearchMode.submittedResults) {
-                      if (controller.loading) return const Center(child: CircularProgressIndicator());
+                      if (controller.loading) {
+                        return const Center(child: CircularProgressIndicator());
+                      }
                       final results = controller.searchItems;
-                      if (results.isEmpty) return const EmptySearchPlaceholder();
+                      if (results.isEmpty) {
+                        return Center(
+                          child: NoResultsPlaceholder(
+                            query: _searchQuery,
+                            primary: primary,
+                          ),
+                        );
+                      }
                       return ListView.builder(
                         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                         itemCount: results.length,
@@ -217,8 +226,11 @@ class _ProvinceAttractionsPageState extends State<ProvinceAttractionsPage> with 
 
                     final items = controller.allItems;
                     if (items.isEmpty) {
-                      return const Center(
-                        child: Text('هیچ جاذبه‌ای یافت نشد', style: TextStyle(color: Colors.white)),
+                      return Center(
+                        child: NoResultsPlaceholder(
+                          query: '',
+                          primary: primary,
+                        ),
                       );
                     }
 
@@ -389,6 +401,48 @@ class _ProvinceAttractionsPageState extends State<ProvinceAttractionsPage> with 
               ),
             ],
           ),
+        ),
+      ),
+    );
+  }
+}
+
+class NoResultsPlaceholder extends StatelessWidget {
+  final String query;
+  final Color primary;
+
+  const NoResultsPlaceholder({Key? key, required this.query, required this.primary}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    final hasQuery = query.trim().isNotEmpty;
+    return Directionality(
+      textDirection: TextDirection.rtl,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 24),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Icon(Icons.travel_explore, color: Colors.white38, size: 56),
+            const SizedBox(height: 12),
+            hasQuery
+                ? RichText(
+              textAlign: TextAlign.center,
+              text: TextSpan(
+                style: const TextStyle(color: Colors.white70, fontSize: 14, height: 1.6,fontFamily: 'customy'),
+                children: [
+                  const TextSpan(text: 'برای '),
+                  TextSpan(text: '«$query»', style: TextStyle(color: primary, fontWeight: FontWeight.bold)),
+                  const TextSpan(text: ' یافت نشد.'),
+                ],
+              ),
+            )
+                : const Text(
+              'جاذبه‌ای یافت نشد.',
+              textAlign: TextAlign.center,
+              style: TextStyle(color: Colors.white70, fontSize: 14),
+            ),
+          ],
         ),
       ),
     );

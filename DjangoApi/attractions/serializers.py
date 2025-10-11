@@ -1,3 +1,5 @@
+from zipfile import Path
+
 from rest_framework import serializers
 from django.db.models import Avg, Count
 from .models import Attraction, AttractionPhoto, AttractionReview
@@ -62,17 +64,25 @@ class AttractionSearchResultSerializer(serializers.ModelSerializer):
         )
 
     def get_cover_image_url(self, obj):
+        f = getattr(obj, "cover_image", None)
+        if not f:
+            return ""
+
         try:
-            return obj.cover_image.url if obj.cover_image else None
+            url = f.url
         except Exception:
-            return None
+            return ""
+        request = self.context.get("request")
+        if request:
+            return request.build_absolute_uri(url)
+        return url
 
     def get_cover_image_name(self, obj):
-        try:
-            return obj.cover_image.name.split("/")[-1] if obj.cover_image and obj.cover_image.name else None
-        except Exception:
-            return None
-
+        f = getattr(obj, "cover_image", None)
+        if not f:
+            return ""
+        name = getattr(f, "name", "")
+        return name
 class AttractionDetailSerializer(AttractionSerializer):
     photos = AttractionPhotoSerializer(many=True, read_only=True)
     reviews = AttractionReviewSerializer(many=True, read_only=True)
