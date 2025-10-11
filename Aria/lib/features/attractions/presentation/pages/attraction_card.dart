@@ -6,11 +6,21 @@ import '../../domain/entities/attraction_search_result.dart';
 class SearchAttractionCard extends StatelessWidget {
   final AttractionSearchResult result;
   final VoidCallback? onTap;
+  final double radius;
+  final double thumbSize;
+  final Color? cardColor;
+  final String? baseUrl;
+  final bool useFaDigits;
 
   const SearchAttractionCard({
     Key? key,
     required this.result,
     this.onTap,
+    this.radius = 8.0,
+    this.thumbSize = 50.0,
+    this.cardColor,
+    this.baseUrl,
+    this.useFaDigits = true,
   }) : super(key: key);
 
   static const _en = ['0','1','2','3','4','5','6','7','8','9'];
@@ -18,6 +28,7 @@ class SearchAttractionCard extends StatelessWidget {
   static const _ar = ['٠','١','٢','٣','٤','٥','٦','٧','٨','٩'];
 
   String _toFa(String input) {
+    if (!useFaDigits) return input;
     var out = input;
     for (var i = 0; i < 10; i++) {
       out = out.replaceAll(_en[i], _fa[i]);
@@ -28,10 +39,7 @@ class SearchAttractionCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    const cardColor = AppColors.menuBackground;
-    const radius = 8.0;
-    const thumbSize = 50.0;
-
+    final bg = cardColor ?? AppColors.menuBackground;
     final ratingFa = _toFa(result.averageRating.toStringAsFixed(2));
 
     return Directionality(
@@ -39,7 +47,7 @@ class SearchAttractionCard extends StatelessWidget {
       child: Container(
         margin: const EdgeInsets.only(bottom: 12),
         decoration: BoxDecoration(
-          color: cardColor,
+          color: bg,
           borderRadius: BorderRadius.circular(radius),
         ),
         child: Material(
@@ -57,6 +65,7 @@ class SearchAttractionCard extends StatelessWidget {
                     child: _ThumbImage(
                       url: result.coverImageUrl,
                       size: thumbSize,
+                      baseUrl: baseUrl,
                     ),
                   ),
                   const SizedBox(width: 12),
@@ -124,8 +133,9 @@ class SearchAttractionCard extends StatelessWidget {
 class _ThumbImage extends StatefulWidget {
   final String url;
   final double size;
+  final String? baseUrl;
 
-  const _ThumbImage({Key? key, required this.url, required this.size}) : super(key: key);
+  const _ThumbImage({Key? key, required this.url, required this.size, this.baseUrl}) : super(key: key);
 
   @override
   State<_ThumbImage> createState() => _ThumbImageState();
@@ -135,9 +145,19 @@ class _ThumbImageState extends State<_ThumbImage> {
   bool _loaded = false;
   bool _error = false;
 
+  String _abs(String url) {
+    if (url.isEmpty) return url;
+    if (url.startsWith('http://') || url.startsWith('https://')) return url;
+    final base = widget.baseUrl?.trim().replaceAll(RegExp(r'/$'), '') ?? 'http://10.0.2.2:8000';
+    final path = url.trim().startsWith('/') ? url.trim() : '/${url.trim()}';
+    return '$base$path';
+  }
+
   @override
   Widget build(BuildContext context) {
-    if (widget.url.isEmpty || _error) {
+    final resolved = _abs(widget.url);
+
+    if (resolved.isEmpty || _error) {
       return Container(
         width: widget.size,
         height: widget.size,
@@ -150,7 +170,7 @@ class _ThumbImageState extends State<_ThumbImage> {
       duration: const Duration(milliseconds: 250),
       child: _loaded
           ? Image.network(
-        widget.url,
+        resolved,
         key: const ValueKey('thumb-ready'),
         width: widget.size,
         height: widget.size,
@@ -162,7 +182,7 @@ class _ThumbImageState extends State<_ThumbImage> {
         children: [
           _ShimmerBox(width: widget.size, height: widget.size, radius: 8),
           Image.network(
-            widget.url,
+            resolved,
             width: widget.size,
             height: widget.size,
             fit: BoxFit.cover,

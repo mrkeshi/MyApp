@@ -5,16 +5,43 @@ import '../../../province/presentation/controller/province_controller.dart';
 import '../controller/attractions_controller.dart';
 
 class AttractionSlider extends StatefulWidget {
-  const AttractionSlider({Key? key}) : super(key: key);
+  final double height;
+  final double viewportFraction;
+  final double outerClipRadius;
+  final double cardRadius;
+  final EdgeInsetsGeometry pageHorizontalMargin;
+  final String ctaText;
+  final Color? indicatorActiveColor;
+  final Color? indicatorInactiveColor;
+  final void Function(int id)? onTapCta;
+
+  const AttractionSlider({
+    Key? key,
+    this.height = 180,
+    this.viewportFraction = 1,
+    this.outerClipRadius = 8,
+    this.cardRadius = 20,
+    this.pageHorizontalMargin = const EdgeInsets.symmetric(horizontal: 6),
+    this.ctaText = 'بزن بریم',
+    this.indicatorActiveColor,
+    this.indicatorInactiveColor,
+    this.onTapCta,
+  }) : super(key: key);
 
   @override
   State<AttractionSlider> createState() => _AttractionSliderState();
 }
 
 class _AttractionSliderState extends State<AttractionSlider> {
-  final PageController _pageController = PageController(viewportFraction: 1);
+  late final PageController _pageController;
   int _currentIndex = 0;
   bool _initialized = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _pageController = PageController(viewportFraction: widget.viewportFraction);
+  }
 
   @override
   void didChangeDependencies() {
@@ -35,44 +62,44 @@ class _AttractionSliderState extends State<AttractionSlider> {
     final attractions = controller.top3Items;
 
     if (controller.loading) {
-      return const SizedBox(
-        height: 180,
-        child: Center(child: CircularProgressIndicator()),
+      return SizedBox(
+        height: widget.height,
+        child: const Center(child: CircularProgressIndicator()),
       );
     }
 
     if (controller.error != null) {
       return SizedBox(
-        height: 180,
+        height: widget.height,
         child: Center(child: Text(controller.error!)),
       );
     }
 
     if (attractions.isEmpty) {
-      return const SizedBox(
-        height: 180,
-        child: Center(child: Text('هیچ جاذبه‌ای موجود نیست')),
+      return SizedBox(
+        height: widget.height,
+        child: const Center(child: Text('هیچ جاذبه‌ای موجود نیست')),
       );
     }
+
+    final activeColor = widget.indicatorActiveColor ?? Theme.of(context).primaryColor;
+    final inactiveColor = widget.indicatorInactiveColor ?? Colors.grey.shade400;
 
     return Column(
       children: [
         ClipRRect(
-          borderRadius: BorderRadius.circular(8),
+          borderRadius: BorderRadius.circular(widget.outerClipRadius),
           child: SizedBox(
-            height: 180, 
+            height: widget.height,
             child: PageView.builder(
               controller: _pageController,
               physics: const BouncingScrollPhysics(),
               itemCount: attractions.length,
-              onPageChanged: (index) {
-                setState(() => _currentIndex = index);
-              },
+              onPageChanged: (index) => setState(() => _currentIndex = index),
               itemBuilder: (context, index) {
                 final attraction = attractions[index];
-
                 return Container(
-                  margin: const EdgeInsets.symmetric(horizontal: 6),
+                  margin: widget.pageHorizontalMargin,
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(12),
                     boxShadow: [
@@ -84,15 +111,14 @@ class _AttractionSliderState extends State<AttractionSlider> {
                     ],
                   ),
                   child: ClipRRect(
-                    borderRadius: BorderRadius.circular(20),
+                    borderRadius: BorderRadius.circular(widget.cardRadius),
                     child: Stack(
                       fit: StackFit.expand,
                       children: [
                         Image.network(
                           attraction.coverImage,
                           fit: BoxFit.cover,
-                          errorBuilder: (_, __, ___) =>
-                          const Center(child: Icon(Icons.broken_image)),
+                          errorBuilder: (_, __, ___) => const Center(child: Icon(Icons.broken_image)),
                         ),
                         Container(
                           decoration: BoxDecoration(
@@ -112,19 +138,19 @@ class _AttractionSliderState extends State<AttractionSlider> {
                           child: ElevatedButton(
                             style: ElevatedButton.styleFrom(
                               backgroundColor: Theme.of(context).primaryColor,
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 8,
-                              ),
+                              padding: const EdgeInsets.symmetric(horizontal: 8),
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(8),
                               ),
                             ),
                             onPressed: () {
-                              // TODO: رفتن به صفحه جزئیات
+                              if (widget.onTapCta != null) {
+                                widget.onTapCta!(attraction.id);
+                              }
                             },
-                            child: const Text(
-                              'بزن بریم',
-                              style: TextStyle(
+                            child: Text(
+                              widget.ctaText,
+                              style: const TextStyle(
                                 color: AppColors.black,
                                 fontWeight: FontWeight.w800,
                                 fontSize: 10,
@@ -151,9 +177,7 @@ class _AttractionSliderState extends State<AttractionSlider> {
               width: _currentIndex == i ? 16 : 10,
               height: 3,
               decoration: BoxDecoration(
-                color: _currentIndex == i
-                    ? Theme.of(context).primaryColor
-                    : Colors.grey.shade400,
+                color: _currentIndex == i ? activeColor : inactiveColor,
                 borderRadius: BorderRadius.circular(2),
               ),
             ),

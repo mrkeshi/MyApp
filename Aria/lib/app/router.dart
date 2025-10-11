@@ -4,6 +4,7 @@ import 'package:aria/features/home/presentation/pages/settings_screen.dart';
 import 'package:aria/features/home/presentation/pages/welcome_Screen.dart';
 import 'package:aria/features/province/presentation/pages/select_province_page.dart';
 import 'package:flutter/material.dart';
+import '../features/attractions/presentation/pages/attraction_detail_page.dart';
 import '../features/attractions/presentation/pages/province_attractions_page.dart';
 import '../features/auth/presentation/pages/edit_profile_page.dart';
 import '../features/auth/presentation/pages/login_page.dart';
@@ -55,6 +56,13 @@ class AppRouter {
 
         return MaterialPageRoute(builder: (_) => OtpPage(phone: phone));
       }
+      case '/attraction':
+        final args = settings.arguments;
+        final int id = args is int
+            ? args
+            : (args is Map && args['id'] is int ? args['id'] as int : 0);
+        return MaterialPageRoute(builder: (_) => AttractionDetailPage(id: id));
+
       case '/login':
         return MaterialPageRoute(builder: (_) => LoginPage());
       default:

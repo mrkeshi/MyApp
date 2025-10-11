@@ -2,7 +2,6 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:provider/provider.dart';
-
 import '../../../../shared/styles/colors.dart';
 import '../../../province/presentation/controller/province_controller.dart';
 import '../controller/attractions_controller.dart';
@@ -21,15 +20,12 @@ class ProvinceAttractionsPage extends StatefulWidget {
 class _ProvinceAttractionsPageState extends State<ProvinceAttractionsPage> with SingleTickerProviderStateMixin {
   final TextEditingController _searchController = TextEditingController();
   final FocusNode _searchFocus = FocusNode();
-
   late AttractionsController _controller;
   bool _initialized = false;
-
   _SearchMode _mode = _SearchMode.idleSlider;
   String _searchQuery = '';
   int _currentPage = 0;
   late PageController _pageController;
-
   bool _initialJumpDone = false;
 
   @override
@@ -216,12 +212,19 @@ class _ProvinceAttractionsPageState extends State<ProvinceAttractionsPage> with 
                       return ListView.builder(
                         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                         itemCount: results.length,
-                        itemBuilder: (_, i) => SearchAttractionCard(result: results[i]),
+                        itemBuilder: (_, i) => SearchAttractionCard(
+                          result: results[i],
+                          onTap: () => Navigator.pushNamed(context, '/attraction', arguments: results[i].id),
+                        ),
                       );
                     }
 
                     if (_mode == _SearchMode.typingEmpty) {
                       return const EmptySearchPlaceholder();
+                    }
+
+                    if (controller.loading) {
+                      return const Center(child: CircularProgressIndicator());
                     }
 
                     final items = controller.allItems;
@@ -252,13 +255,10 @@ class _ProvinceAttractionsPageState extends State<ProvinceAttractionsPage> with 
                         const spacingAboveThumbs = 8.0;
                         const spacingBelowThumbs = 28.0;
                         const itemHorizontalPadding = 14.0;
-
                         final maxPageAreaHeight = constraints.maxHeight - thumbnailsHeight - spacingAboveThumbs - spacingBelowThumbs - slideTopPadding;
                         final pageWidth = screenWidth * _pageController.viewportFraction;
-
                         double imageSize = math.min(pageWidth - (itemHorizontalPadding * 2), maxPageAreaHeight - 40.0);
                         imageSize = imageSize.clamp(170.0, 640.0);
-
                         const thumbSize = 58.0;
 
                         return Column(
@@ -291,50 +291,54 @@ class _ProvinceAttractionsPageState extends State<ProvinceAttractionsPage> with 
                                               child: child,
                                             );
                                           },
-                                          child: Column(
-                                            mainAxisSize: MainAxisSize.min,
-                                            children: [
-                                              ClipRRect(
-                                                borderRadius: BorderRadius.circular(20),
-                                                child: SizedBox(
-                                                  width: imageSize,
-                                                  height: imageSize,
-                                                  child: Image.network(
-                                                    attraction.coverImage,
-                                                    fit: BoxFit.cover,
-                                                    loadingBuilder: (context, child, loadingProgress) {
-                                                      if (loadingProgress == null) return child;
-                                                      return ShimmerBox(width: imageSize, height: imageSize, radius: 20);
-                                                    },
-                                                    errorBuilder: (_, __, ___) => Container(
-                                                      color: Colors.black26,
-                                                      child: const Center(
-                                                        child: Icon(Icons.image_not_supported, color: Colors.white70),
+                                          child: InkWell(
+                                            borderRadius: BorderRadius.circular(20),
+                                            onTap: () => Navigator.pushNamed(context, '/attraction', arguments: attraction.id),
+                                            child: Column(
+                                              mainAxisSize: MainAxisSize.min,
+                                              children: [
+                                                ClipRRect(
+                                                  borderRadius: BorderRadius.circular(20),
+                                                  child: SizedBox(
+                                                    width: imageSize,
+                                                    height: imageSize,
+                                                    child: Image.network(
+                                                      attraction.coverImage,
+                                                      fit: BoxFit.cover,
+                                                      loadingBuilder: (context, child, loadingProgress) {
+                                                        if (loadingProgress == null) return child;
+                                                        return ShimmerBox(width: imageSize, height: imageSize, radius: 20);
+                                                      },
+                                                      errorBuilder: (_, __, ___) => Container(
+                                                        color: Colors.black26,
+                                                        child: const Center(
+                                                          child: Icon(Icons.image_not_supported, color: Colors.white70),
+                                                        ),
                                                       ),
                                                     ),
                                                   ),
                                                 ),
-                                              ),
-                                              const SizedBox(height: 34),
-                                              Text(
-                                                attraction.title,
-                                                textAlign: TextAlign.center,
-                                                style: const TextStyle(
-                                                  color: Colors.white,
-                                                  fontSize: 18,
-                                                  fontWeight: FontWeight.bold,
+                                                const SizedBox(height: 34),
+                                                Text(
+                                                  attraction.title,
+                                                  textAlign: TextAlign.center,
+                                                  style: const TextStyle(
+                                                    color: Colors.white,
+                                                    fontSize: 18,
+                                                    fontWeight: FontWeight.bold,
+                                                  ),
                                                 ),
-                                              ),
-                                              const SizedBox(height: 10),
-                                              Text(
-                                                attraction.venue,
-                                                textAlign: TextAlign.center,
-                                                style: const TextStyle(
-                                                  color: Colors.white70,
-                                                  fontSize: 13,
+                                                const SizedBox(height: 10),
+                                                Text(
+                                                  attraction.venue,
+                                                  textAlign: TextAlign.center,
+                                                  style: const TextStyle(
+                                                    color: Colors.white70,
+                                                    fontSize: 13,
+                                                  ),
                                                 ),
-                                              ),
-                                            ],
+                                              ],
+                                            ),
                                           ),
                                         ),
                                       );
@@ -429,7 +433,7 @@ class NoResultsPlaceholder extends StatelessWidget {
                 ? RichText(
               textAlign: TextAlign.center,
               text: TextSpan(
-                style: const TextStyle(color: Colors.white70, fontSize: 14, height: 1.6,fontFamily: 'customy'),
+                style: const TextStyle(color: Colors.white70, fontSize: 14, height: 1.6, fontFamily: 'customy'),
                 children: [
                   const TextSpan(text: 'برای '),
                   TextSpan(text: '«$query»', style: TextStyle(color: primary, fontWeight: FontWeight.bold)),
