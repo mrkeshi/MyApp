@@ -1,4 +1,5 @@
 import 'package:flutter/foundation.dart';
+
 import '../../domain/entities/attraction.dart';
 import '../../domain/entities/attraction_detail.dart';
 import '../../domain/entities/attraction_search_result.dart';
@@ -32,6 +33,15 @@ class AttractionsController extends ChangeNotifier {
 
   bool _hasFetchedTop3 = false;
   bool _hasFetchedAll = false;
+
+  final Map<int, AttractionDetail> _detailCache = {};
+  final Map<int, Future<AttractionDetail?>> _inflightDetail = {};
+
+  AttractionDetail? getCachedDetail(int id) => _detailCache[id];
+
+  void clearDetailCache() {
+    _detailCache.clear();
+  }
 
   Future<void> loadTop3(int provinceId, {bool force = false}) async {
     if (_loading) return;
@@ -130,14 +140,31 @@ class AttractionsController extends ChangeNotifier {
     }
   }
 
-  Future<AttractionDetail?> getDetail(int id) async {
-    try {
-      return await repository.getAttractionDetail(id);
-    } catch (e, st) {
+  Future<AttractionDetail?> getDetail(int id, {bool force = false}) {
+    if (!force && _detailCache.containsKey(id)) {
+      return Future.value(_detailCache[id]);
+    }
+
+    final inflight = _inflightDetail[id];
+    if (!force && inflight != null) {
+      return inflight;
+    }
+
+    final future = repository.getAttractionDetail(id).then((detail) {
+      if (detail != null) {
+        _detailCache[id] = detail;
+      }
+      return detail;
+    }).catchError((e, st) {
       if (kDebugMode) print('❌ getDetail error: $e\n$st');
       _error = 'خطا در دریافت جزئیات جاذبه';
       notifyListeners();
-      return null;
-    }
+      return _detailCache[id];
+    }).whenComplete(() {
+      _inflightDetail.remove(id);
+    });
+
+    _inflightDetail[id] = future;
+    return future;
   }
 }

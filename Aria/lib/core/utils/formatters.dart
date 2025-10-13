@@ -28,3 +28,9 @@ class PersianDigitsFormatter extends TextInputFormatter {
     );
   }
 }
+String faDigits(String input) {
+  final fmt = PersianDigitsFormatter();
+  return fmt
+      .formatEditUpdate(const TextEditingValue(text: ''), TextEditingValue(text: input))
+      .text;
+}

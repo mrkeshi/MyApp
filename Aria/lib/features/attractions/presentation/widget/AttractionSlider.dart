@@ -146,6 +146,8 @@ class _AttractionSliderState extends State<AttractionSlider> {
                             onPressed: () {
                               if (widget.onTapCta != null) {
                                 widget.onTapCta!(attraction.id);
+                              } else {
+                                Navigator.pushNamed(context, '/attraction', arguments: attraction.id);
                               }
                             },
                             child: Text(

@@ -61,7 +61,7 @@ class AppRouter {
         final int id = args is int
             ? args
             : (args is Map && args['id'] is int ? args['id'] as int : 0);
-        return MaterialPageRoute(builder: (_) => AttractionDetailPage(id: id));
+        return MaterialPageRoute(builder: (_) => AttractionDetailStyledPage(id: id));
 
       case '/login':
         return MaterialPageRoute(builder: (_) => LoginPage());
