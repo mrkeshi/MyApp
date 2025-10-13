@@ -1,9 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../../../core/utils/formatters.dart';
 import '../../../../core/utils/open_in_maps.dart';
-import '../../../../shared/styles/colors.dart';
-
-
 
 class InfoCard extends StatelessWidget {
   final dynamic data;
@@ -13,50 +10,131 @@ class InfoCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final primary = Theme.of(context).colorScheme.primary;
     final rating = (data.averageRating as num).clamp(0, 5).toDouble();
-    final ratingText = '${faDigits(rating.toStringAsFixed(1))} (${faDigits(data.reviewsCount.toString())})';
+    final ratingText = faDigits(rating.toStringAsFixed(1));
 
-    return Container(
-      padding: const EdgeInsets.fromLTRB(14, 10, 14, 14),
-      decoration: BoxDecoration(color: AppColors.menuBackground, borderRadius: BorderRadius.circular(16)),
-      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-        Row(children: [
-          Icon(Icons.star, color: primary, size: 18),
-          const SizedBox(width: 6),
-          Text(ratingText, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w600)),
-          const Spacer(),
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-            decoration: BoxDecoration(color: AppColors.grayBlack, borderRadius: BorderRadius.circular(8)),
-            child: Row(children: [
-              Icon(Icons.favorite_border, size: 16, color: primary),
-              const SizedBox(width: 6),
-              const Text('FAV', style: TextStyle(color: Colors.white, fontSize: 12)),
-            ]),
-          ),
-        ]),
-        const SizedBox(height: 10),
-        Text(data.title, style: const TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold)),
-        const SizedBox(height: 6),
-        if (data.shortDescription?.isNotEmpty == true)
-          const SizedBox(height: 2),
-        if (data.shortDescription?.isNotEmpty == true)
-          const SizedBox(height: 0),
-        if (data.shortDescription?.isNotEmpty == true)
-          Text(data.shortDescription, style: const TextStyle(color: Colors.white70, height: 1.5)),
-        const SizedBox(height: 8),
-        if (data.venue?.isNotEmpty == true)
-          Row(children: [
-            const Icon(Icons.place, color: Colors.white70, size: 18),
-            const SizedBox(width: 6),
-            Expanded(child: Text(data.venue, style: const TextStyle(color: Colors.white70))),
-            const SizedBox(width: 8),
-            TextButton(
-              onPressed: () => openInMaps(data),
-              style: TextButton.styleFrom(foregroundColor: primary),
-              child: const Text('مسیر‌یابی با نقشه'),
+    return Directionality(
+      textDirection: TextDirection.rtl,
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(6, 0, 6, 0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Transform.translate(
+              offset: const Offset(0, 0),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Expanded(
+                    child: Transform.translate(
+                      offset: const Offset(12, 0),
+                      child: Row(
+                        children: [
+                          Container(
+                            width: 3,
+                            height: 26,
+                            margin: const EdgeInsetsDirectional.only(start: 2, end: 8),
+                            decoration: BoxDecoration(
+                              color: primary,
+                              borderRadius: BorderRadius.circular(2),
+                            ),
+                          ),
+                          Expanded(
+                            child: Text(
+                              data.title,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontSize: 19,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Transform.translate(
+                    offset: const Offset(0, 0),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(Icons.star, color: primary, size: 18),
+                        const SizedBox(height: 2),
+                        Text(
+                          ratingText,
+                          style: const TextStyle(
+                            color: Colors.white70,
+                            fontSize: 12.5,
+                            fontFamily: 'customy',
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
             ),
-          ]),
-      ]),
+            Transform.translate(
+              offset: const Offset(0, 2),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  if (data.shortDescription?.isNotEmpty == true)
+                    Text(
+                      data.shortDescription,
+                      textAlign: TextAlign.justify,
+                      textDirection: TextDirection.rtl,
+                      style: const TextStyle(
+                        color: Colors.white70,
+                        fontFamily: 'customy',
+                        height: 1.6,
+                        fontSize: 13,
+                      ),
+                    ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 2),
+            Transform.translate(
+              offset: const Offset(0, 0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  if (data.venue?.isNotEmpty == true)
+                    RichText(
+                      text: TextSpan(
+                        children: [
+                          TextSpan(
+                            text: 'آدرس: ',
+                            style: TextStyle(
+                              color: primary,
+                              fontWeight: FontWeight.w700,
+                              wordSpacing: -1,
+                              fontFamily: 'customy',
+                            ),
+                          ),
+                          TextSpan(
+                            text: data.venue,
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontFamily: 'customy',
+                              fontSize: 12,
+                              fontWeight: FontWeight.w300,
+                              wordSpacing: -1,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }
