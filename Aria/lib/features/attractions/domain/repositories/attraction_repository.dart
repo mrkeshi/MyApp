@@ -12,4 +12,6 @@ abstract class AttractionRepository {
   Future<AttractionDetail> getAttractionDetail(int id);
 
   Future<List<AttractionSearchResult>> searchAttractions(String query);
+
+  Future<void> submitReview({required int attractionId, required int rating, required String comment});
 }

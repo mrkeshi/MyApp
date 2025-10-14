@@ -33,4 +33,9 @@ class AttractionRepositoryImpl implements AttractionRepository {
   Future<List<AttractionSearchResult>> searchAttractions(String query) async {
     return await remote.searchAttractions(query);
   }
+  @override
+  Future<void> submitReview({required int attractionId, required int rating, required String comment}) async {
+    await remote.postMyReview(attractionId: attractionId, rating: rating, comment: comment);
+  }
+
 }

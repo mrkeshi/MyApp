@@ -22,7 +22,7 @@ class TabsRow extends StatelessWidget {
         removeRight: true,
         child: SizedBox(
           width: MediaQuery.of(context).size.width,
-          height: 52,
+          height:55,
           child: Material(
             color: Colors.transparent,
             child: Container(

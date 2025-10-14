@@ -123,6 +123,7 @@ class AttractionRemoteDataSource {
       );
     }
   }
+
   Future<List<Attraction>> getTop10Attractions(int provinceId) async {
     final prefs = await SharedPreferences.getInstance();
     final accessToken = prefs.getString('access_token');
@@ -158,4 +159,50 @@ class AttractionRemoteDataSource {
     }
   }
 
+  Future<void> postMyReview({
+    required int attractionId,
+    required int rating,
+    required String comment,
+  }) async {
+    final prefs = await SharedPreferences.getInstance();
+    final accessToken = prefs.getString('access_token');
+
+    if (accessToken == null || accessToken.isEmpty) {
+      throw DioException(
+        requestOptions: RequestOptions(path: '/api/v1/attractions/$attractionId/reviews/my/'),
+        error: 'توکن دسترسی موجود نیست',
+        type: DioExceptionType.unknown,
+      );
+    }
+
+    final res = await dio.post(
+      '/api/v1/attractions/$attractionId/reviews/my/',
+      data: {'rating': rating, 'comment': comment},
+      options: Options(
+        headers: {
+          'Authorization': 'Bearer $accessToken',
+          'Content-Type': 'application/json',
+        },
+        validateStatus: (_) => true,
+      ),
+    );
+
+    if (res.statusCode == 200 || res.statusCode == 201) {
+      return;
+    } else if (res.statusCode == 401) {
+      throw DioException(
+        requestOptions: RequestOptions(path: '/api/v1/attractions/$attractionId/reviews/my/'),
+        error: 'دسترسی نامعتبر (401). لطفاً دوباره وارد شوید.',
+        type: DioExceptionType.badResponse,
+        response: res,
+      );
+    } else {
+      throw DioException(
+        requestOptions: RequestOptions(path: '/api/v1/attractions/$attractionId/reviews/my/'),
+        error: 'خطا در ثبت نظر: ${res.statusCode}',
+        type: DioExceptionType.badResponse,
+        response: res,
+      );
+    }
+  }
 }
