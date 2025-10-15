@@ -82,8 +82,8 @@ class MapSection extends StatelessWidget {
             decoration: BoxDecoration(
               boxShadow: [
                 BoxShadow(
-                  color: primary.withOpacity(0.7),
-                  blurRadius: 20,
+                  color: primary.withOpacity(0.3),
+                  blurRadius: 10,
                   spreadRadius: 1,
                 ),
               ],

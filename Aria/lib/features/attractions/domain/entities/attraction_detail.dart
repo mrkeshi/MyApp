@@ -21,6 +21,8 @@ class AttractionReview {
   final int rating;
   final String comment;
   final String createdAt;
+  final String? createdAtText;
+  final String? profileImage;
 
   const AttractionReview({
     required this.id,
@@ -29,6 +31,8 @@ class AttractionReview {
     required this.rating,
     required this.comment,
     required this.createdAt,
+    this.createdAtText,
+    this.profileImage,
   });
 }
 

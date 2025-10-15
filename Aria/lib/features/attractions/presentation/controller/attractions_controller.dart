@@ -147,6 +147,7 @@ class AttractionsController extends ChangeNotifier {
     final future = repository.getAttractionDetail(id).then((detail) {
       if (detail != null) {
         _detailCache[id] = detail;
+        notifyListeners();
       }
       return detail;
     }).catchError((e, st) {

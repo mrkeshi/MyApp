@@ -114,6 +114,7 @@ class AttractionViewSet(mixins.ListModelMixin,
     def reviews(self, request, pk=None):
         attraction = self.get_object()
         ser = AttractionReviewSerializer(attraction.reviews.select_related("user"), many=True, context={"request": request})
+
         return Response(ser.data)
 
     @extend_schema(
@@ -129,22 +130,28 @@ class AttractionViewSet(mixins.ListModelMixin,
             return Response(status=status.HTTP_204_NO_CONTENT)
         return Response(AttractionReviewSerializer(obj, context={"request": request}).data)
 
-    @extend_schema(
-        tags=["Attractions"],
-        summary="Create/Update my review",
-        request=AttractionReviewCreateSerializer,
-        responses={200: OpenApiResponse(response=AttractionReviewSerializer, description="Upserted review")}
+    @action(
+        detail=True,
+        methods=["post"],
+        url_path="reviews-my",
+        permission_classes=[permissions.IsAuthenticated],
     )
-    @action(detail=True, methods=["post"], url_path="reviews/my", permission_classes=[permissions.IsAuthenticated])
-    def upsert_my_review(self, request, pk=None):
+    def create_my_review(self, request, pk=None):
         attraction = self.get_object()
         ser = AttractionReviewCreateSerializer(data=request.data)
         ser.is_valid(raise_exception=True)
-        obj, _ = AttractionReview.objects.update_or_create(
-            attraction=attraction, user=request.user,
-            defaults={"rating": ser.validated_data["rating"], "comment": ser.validated_data.get("comment", "")}
+
+        obj = AttractionReview.objects.create(
+            attraction=attraction,
+            user=request.user,
+            rating=ser.validated_data["rating"],
+            comment=ser.validated_data.get("comment", "")
         )
-        return Response(AttractionReviewSerializer(obj, context={"request": request}).data, status=status.HTTP_200_OK)
+
+        return Response(
+            AttractionReviewSerializer(obj, context={"request": request}).data,
+            status=status.HTTP_201_CREATED
+        )
 
     @extend_schema(
         tags=["Attractions"],

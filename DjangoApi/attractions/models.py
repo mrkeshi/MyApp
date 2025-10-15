@@ -48,15 +48,13 @@ class AttractionPhoto(models.Model):
 class AttractionReview(models.Model):
     attraction = models.ForeignKey(Attraction, on_delete=models.CASCADE, related_name="reviews")
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="attraction_reviews")
-    rating = models.PositiveSmallIntegerField()  # 1..5
+    rating = models.PositiveSmallIntegerField()
     comment = models.TextField(blank=True, default="")
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
         ordering = ("-created_at",)
-        constraints = [
-            models.UniqueConstraint(fields=["attraction", "user"], name="one_review_per_user_per_attraction"),
-        ]
+
 
     def __str__(self):
         return f"{self.attraction_id}-{self.user_id} ({self.rating})"

@@ -13,150 +13,111 @@ class AttractionRemoteDataSource {
 
   AttractionRemoteDataSource(this.dio);
 
-  Future<List<Attraction>> getTopAttractions(int provinceId) async {
+  Future<Map<String, String>> _authHeaders() async {
     final prefs = await SharedPreferences.getInstance();
-    final accessToken = prefs.getString('access_token');
-
-    if (accessToken == null || accessToken.isEmpty) {
+    final token = prefs.getString('access_token');
+    if (token == null || token.isEmpty) {
       throw DioException(
-        requestOptions: RequestOptions(path: '/api/v1/attractions/top-attractions/'),
+        requestOptions: RequestOptions(path: ''),
         error: 'توکن دسترسی موجود نیست',
         type: DioExceptionType.unknown,
       );
     }
+    return {'Authorization': 'Bearer $token', 'Content-Type': 'application/json'};
+  }
 
+  Options _opts(Map<String, String> headers) => Options(headers: headers, validateStatus: (_) => true);
+
+  Future<List<Attraction>> getTopAttractions(int provinceId) async {
+    final headers = await _authHeaders();
     final res = await dio.get(
       '/api/v1/attractions/top-attractions/',
       queryParameters: {'province_id': provinceId},
-      options: Options(
-        headers: {'Authorization': 'Bearer $accessToken'},
-        validateStatus: (_) => true,
-      ),
+      options: _opts(headers),
     );
-
     if (res.statusCode == 200) {
       final data = res.data as List<dynamic>;
-      return data
-          .map((e) => AttractionDto.fromJson(e as Map<String, dynamic>).toEntity())
-          .toList();
-    } else {
-      throw DioException(
-        requestOptions: RequestOptions(path: '/api/v1/attractions/top-attractions/'),
-        error: 'خطا در دریافت داده: ${res.statusCode}',
-        type: DioExceptionType.unknown,
-      );
+      return data.map((e) => AttractionDto.fromJson(e as Map<String, dynamic>).toEntity()).toList();
     }
+    throw DioException(
+      requestOptions: RequestOptions(path: '/api/v1/attractions/top-attractions/'),
+      error: 'خطا در دریافت داده: ${res.statusCode}',
+      type: DioExceptionType.badResponse,
+      response: res,
+    );
   }
 
   Future<List<Attraction>> getAttractions() async {
-    final prefs = await SharedPreferences.getInstance();
-    final accessToken = prefs.getString('access_token');
-
+    final headers = await _authHeaders();
     final res = await dio.get(
       '/api/v1/attractions/',
-      options: Options(
-        headers: {'Authorization': 'Bearer $accessToken'},
-        validateStatus: (_) => true,
-      ),
+      options: _opts(headers),
     );
-
     if (res.statusCode == 200) {
       final data = res.data as List<dynamic>;
-      return data
-          .map((e) => AttractionDto.fromJson(e as Map<String, dynamic>).toEntity())
-          .toList();
-    } else {
-      throw DioException(
-        requestOptions: RequestOptions(path: '/api/v1/attractions/'),
-        error: 'خطا در دریافت داده: ${res.statusCode}',
-        type: DioExceptionType.unknown,
-      );
+      return data.map((e) => AttractionDto.fromJson(e as Map<String, dynamic>).toEntity()).toList();
     }
+    throw DioException(
+      requestOptions: RequestOptions(path: '/api/v1/attractions/'),
+      error: 'خطا در دریافت داده: ${res.statusCode}',
+      type: DioExceptionType.badResponse,
+      response: res,
+    );
   }
 
   Future<AttractionDetail> getAttractionDetail(int id) async {
-    final prefs = await SharedPreferences.getInstance();
-    final accessToken = prefs.getString('access_token');
-
+    final headers = await _authHeaders();
     final res = await dio.get(
       '/api/v1/attractions/$id/',
-      options: Options(
-        headers: {'Authorization': 'Bearer $accessToken'},
-        validateStatus: (_) => true,
-      ),
+      options: _opts(headers),
     );
-
     if (res.statusCode == 200) {
       return AttractionDetailDto.fromJson(res.data as Map<String, dynamic>).toEntity();
-    } else {
-      throw DioException(
-        requestOptions: RequestOptions(path: '/api/v1/attractions/$id/'),
-        error: 'خطا در دریافت داده: ${res.statusCode}',
-        type: DioExceptionType.unknown,
-      );
     }
+    throw DioException(
+      requestOptions: RequestOptions(path: '/api/v1/attractions/$id/'),
+      error: 'خطا در دریافت داده: ${res.statusCode}',
+      type: DioExceptionType.badResponse,
+      response: res,
+    );
   }
 
   Future<List<AttractionSearchResult>> searchAttractions(String query) async {
-    final prefs = await SharedPreferences.getInstance();
-    final accessToken = prefs.getString('access_token');
-
+    final headers = await _authHeaders();
     final res = await dio.get(
       '/api/v1/attractions/search/',
       queryParameters: {'q': query},
-      options: Options(
-        headers: {'Authorization': 'Bearer $accessToken'},
-        validateStatus: (_) => true,
-      ),
+      options: _opts(headers),
     );
-
     if (res.statusCode == 200) {
       final data = res.data as List<dynamic>;
-      return data
-          .map((e) => AttractionSearchResultDto.fromJson(e as Map<String, dynamic>).toEntity())
-          .toList();
-    } else {
-      throw DioException(
-        requestOptions: RequestOptions(path: '/api/v1/attractions/search/'),
-        error: 'خطا در دریافت داده: ${res.statusCode}',
-        type: DioExceptionType.unknown,
-      );
+      return data.map((e) => AttractionSearchResultDto.fromJson(e as Map<String, dynamic>).toEntity()).toList();
     }
+    throw DioException(
+      requestOptions: RequestOptions(path: '/api/v1/attractions/search/'),
+      error: 'خطا در دریافت داده: ${res.statusCode}',
+      type: DioExceptionType.badResponse,
+      response: res,
+    );
   }
 
   Future<List<Attraction>> getTop10Attractions(int provinceId) async {
-    final prefs = await SharedPreferences.getInstance();
-    final accessToken = prefs.getString('access_token');
-
-    if (accessToken == null || accessToken.isEmpty) {
-      throw DioException(
-        requestOptions: RequestOptions(path: '/api/v1/attractions/top-10-attractions/'),
-        error: 'توکن دسترسی موجود نیست',
-        type: DioExceptionType.unknown,
-      );
-    }
-
+    final headers = await _authHeaders();
     final res = await dio.get(
       '/api/v1/attractions/top-10-attractions/',
       queryParameters: {'province_id': provinceId},
-      options: Options(
-        headers: {'Authorization': 'Bearer $accessToken'},
-        validateStatus: (_) => true,
-      ),
+      options: _opts(headers),
     );
-
     if (res.statusCode == 200) {
       final data = res.data as List<dynamic>;
-      return data
-          .map((e) => AttractionDto.fromJson(e as Map<String, dynamic>).toEntity())
-          .toList();
-    } else {
-      throw DioException(
-        requestOptions: RequestOptions(path: '/api/v1/attractions/top-10-attractions/'),
-        error: 'خطا در دریافت داده: ${res.statusCode}',
-        type: DioExceptionType.unknown,
-      );
+      return data.map((e) => AttractionDto.fromJson(e as Map<String, dynamic>).toEntity()).toList();
     }
+    throw DioException(
+      requestOptions: RequestOptions(path: '/api/v1/attractions/top-10-attractions/'),
+      error: 'خطا در دریافت داده: ${res.statusCode}',
+      type: DioExceptionType.badResponse,
+      response: res,
+    );
   }
 
   Future<void> postMyReview({
@@ -164,45 +125,30 @@ class AttractionRemoteDataSource {
     required int rating,
     required String comment,
   }) async {
-    final prefs = await SharedPreferences.getInstance();
-    final accessToken = prefs.getString('access_token');
-
-    if (accessToken == null || accessToken.isEmpty) {
-      throw DioException(
-        requestOptions: RequestOptions(path: '/api/v1/attractions/$attractionId/reviews/my/'),
-        error: 'توکن دسترسی موجود نیست',
-        type: DioExceptionType.unknown,
-      );
-    }
-
+    final headers = await _authHeaders();
+    final path = '/api/v1/attractions/$attractionId/reviews-my/';
     final res = await dio.post(
-      '/api/v1/attractions/$attractionId/reviews/my/',
+      path,
       data: {'rating': rating, 'comment': comment},
-      options: Options(
-        headers: {
-          'Authorization': 'Bearer $accessToken',
-          'Content-Type': 'application/json',
-        },
-        validateStatus: (_) => true,
-      ),
+      options: _opts(headers),
     );
 
     if (res.statusCode == 200 || res.statusCode == 201) {
       return;
-    } else if (res.statusCode == 401) {
+    }
+    if (res.statusCode == 401) {
       throw DioException(
-        requestOptions: RequestOptions(path: '/api/v1/attractions/$attractionId/reviews/my/'),
+        requestOptions: RequestOptions(path: path),
         error: 'دسترسی نامعتبر (401). لطفاً دوباره وارد شوید.',
         type: DioExceptionType.badResponse,
         response: res,
       );
-    } else {
-      throw DioException(
-        requestOptions: RequestOptions(path: '/api/v1/attractions/$attractionId/reviews/my/'),
-        error: 'خطا در ثبت نظر: ${res.statusCode}',
-        type: DioExceptionType.badResponse,
-        response: res,
-      );
     }
+    throw DioException(
+      requestOptions: RequestOptions(path: path),
+      error: 'خطا در ثبت نظر: ${res.statusCode}',
+      type: DioExceptionType.badResponse,
+      response: res,
+    );
   }
 }

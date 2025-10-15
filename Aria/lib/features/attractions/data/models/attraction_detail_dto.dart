@@ -43,6 +43,8 @@ class AttractionReviewDto {
   final int rating;
   final String comment;
   final String createdAt;
+  final String? createdAtText;
+  final String? profileImage;
 
   const AttractionReviewDto({
     required this.id,
@@ -51,6 +53,8 @@ class AttractionReviewDto {
     required this.rating,
     required this.comment,
     required this.createdAt,
+    this.createdAtText,
+    this.profileImage,
   });
 
   factory AttractionReviewDto.fromJson(Map<String, dynamic> json) {
@@ -61,6 +65,8 @@ class AttractionReviewDto {
       rating: (json['rating'] ?? 0) as int,
       comment: (json['comment'] ?? '') as String,
       createdAt: (json['created_at'] ?? '') as String,
+      createdAtText: json['created_at_text'] as String?,
+      profileImage: json['profile_image'] as String?,
     );
   }
 
@@ -72,6 +78,8 @@ class AttractionReviewDto {
       rating: rating,
       comment: comment,
       createdAt: createdAt,
+      createdAtText: createdAtText,
+      profileImage: profileImage,
     );
   }
 }
