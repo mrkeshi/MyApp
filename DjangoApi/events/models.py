@@ -38,9 +38,7 @@ class EventReview(models.Model):
 
     class Meta:
         ordering = ("-created_at",)
-        constraints = [
-            models.UniqueConstraint(fields=["event", "user"], name="one_review_per_user_per_event"),
-        ]
+
 
     def __str__(self):
         return f"{self.event_id} - {self.user_id} ({self.rating})"

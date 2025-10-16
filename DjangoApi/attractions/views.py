@@ -6,7 +6,7 @@ from drf_spectacular.utils import extend_schema, OpenApiResponse
 
 from Province.models import ProvincePhoto
 from Province.serializers import ProvincePhotoSerializer
-from .models import Attraction, AttractionReview, AttractionPhoto  # 👈 اضافه شد
+from .models import Attraction, AttractionReview, AttractionPhoto
 from .serializers import (
     AttractionSerializer, AttractionPhotoSerializer, AttractionSearchResultSerializer,
     AttractionReviewSerializer, AttractionReviewCreateSerializer, AttractionDetailSerializer

@@ -86,9 +86,7 @@ class HeaderWidget extends StatelessWidget {
   }
 }
 
-// -------------------------
-// Animated Skeleton CircleAvatar
-// -------------------------
+
 class AnimatedCircleAvatar extends StatefulWidget {
   final String? imageUrl;
   final double radius;

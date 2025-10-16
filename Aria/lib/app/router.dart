@@ -6,6 +6,7 @@ import 'package:aria/features/province/presentation/pages/select_province_page.d
 import 'package:flutter/material.dart';
 import '../features/attractions/presentation/pages/attraction_detail_page.dart';
 import '../features/attractions/presentation/pages/province_attractions_page.dart';
+import '../features/attractions/presentation/pages/suggested_attractions_page.dart'; // ✅ اضافه شد
 import '../features/auth/presentation/pages/edit_profile_page.dart';
 import '../features/auth/presentation/pages/login_page.dart';
 import '../features/auth/presentation/pages/otp_page.dart';
@@ -14,34 +15,64 @@ import '../features/home/presentation/pages/home_screen.dart';
 import '../features/home/presentation/pages/theme_select_page.dart';
 import '../features/province/presentation/pages/about_provice.dart';
 
-
 class AppRouter {
   static Route<dynamic> generateRoute(RouteSettings settings) {
     switch (settings.name) {
       case '/':
         return MaterialPageRoute(builder: (_) => SplashScreen());
+
       case '/home':
         return MaterialPageRoute(builder: (_) => const MainNavHost(initialIndex: 1));
+
       case '/settings':
         return MaterialPageRoute(builder: (_) => const MainNavHost(initialIndex: 0));
+
       case '/bookmark':
         return MaterialPageRoute(builder: (_) => const MainNavHost(initialIndex: 2));
+
       case '/gallery':
         return MaterialPageRoute(builder: (_) => const MainNavHost(initialIndex: 3));
+
       case '/welcome':
         return MaterialPageRoute(builder: (_) => OnboardingScreen());
+
       case '/edit-profile':
         return MaterialPageRoute(builder: (_) => EditProfilePage());
+
       case '/select-theme':
         return MaterialPageRoute(builder: (_) => ThemeSelectPage());
+
       case '/about-dev':
         return MaterialPageRoute(builder: (_) => AboutDeveloperPage());
+
       case '/choose-province':
         return MaterialPageRoute(builder: (_) => IranMapScreen());
+
       case '/about-province':
         return MaterialPageRoute(builder: (_) => ProvincePage());
+
       case '/province-attractions':
         return MaterialPageRoute(builder: (_) => const ProvinceAttractionsPage());
+
+      case '/suggested-attractions': {
+        final args = settings.arguments;
+        int provinceId = 0;
+        String? baseUrl;
+
+        if (args is int) {
+          provinceId = args;
+        } else if (args is Map) {
+          if (args['provinceId'] is int) provinceId = args['provinceId'];
+          if (args['baseUrl'] is String) baseUrl = args['baseUrl'];
+        }
+
+        return MaterialPageRoute(
+          builder: (_) => SuggestedAttractionsPage(
+            provinceId: provinceId,
+            baseUrl: baseUrl,
+          ),
+        );
+      }
 
       case '/otp': {
         final args = settings.arguments;
@@ -56,19 +87,24 @@ class AppRouter {
 
         return MaterialPageRoute(builder: (_) => OtpPage(phone: phone));
       }
-      case '/attraction':
+
+      case '/attraction': {
         final args = settings.arguments;
         final int id = args is int
             ? args
             : (args is Map && args['id'] is int ? args['id'] as int : 0);
         return MaterialPageRoute(builder: (_) => AttractionDetailStyledPage(id: id));
+      }
 
       case '/login':
         return MaterialPageRoute(builder: (_) => LoginPage());
+
       default:
         return MaterialPageRoute(
           builder: (_) => Scaffold(
-            body: Center(child: Text('Route not found!')),
+            body: Center(
+              child: Text('Route not found!'),
+            ),
           ),
         );
     }

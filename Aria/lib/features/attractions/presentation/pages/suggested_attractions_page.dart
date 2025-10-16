@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:provider/provider.dart';
 import 'package:aria/shared/styles/colors.dart';
 import '../../presentation/controller/attractions_controller.dart';
@@ -18,8 +19,7 @@ class _SuggestedAttractionsPageState extends State<SuggestedAttractionsPage> {
   void initState() {
     super.initState();
     Future.microtask(() {
-      final c = context.read<AttractionsController>();
-      c.loadTop10(widget.provinceId, force: true);
+      context.read<AttractionsController>().loadTop10(widget.provinceId, force: true);
     });
   }
 
@@ -29,7 +29,8 @@ class _SuggestedAttractionsPageState extends State<SuggestedAttractionsPage> {
 
   @override
   Widget build(BuildContext context) {
-    final divider = const Divider(height: 1, thickness: 1, color: Color(0x1AFFFFFF));
+    final primary = Theme.of(context).colorScheme.primary;
+
     return Directionality(
       textDirection: TextDirection.rtl,
       child: Scaffold(
@@ -37,49 +38,50 @@ class _SuggestedAttractionsPageState extends State<SuggestedAttractionsPage> {
         body: SafeArea(
           child: Column(
             children: [
-              Padding(
-                padding: const EdgeInsets.fromLTRB(8, 6, 8, 4),
-                child: Row(
+              SizedBox(
+                height: 48,
+                child: Stack(
+                  alignment: Alignment.center,
                   children: [
-                    IconButton(
-                      onPressed: () => Navigator.of(context).maybePop(),
-                      icon: const Icon(Icons.arrow_back_ios_new_rounded, color: Colors.white, size: 18),
-                    ),
-                    const SizedBox(width: 4),
-                    const Expanded(
+                    const Center(
                       child: Text(
                         'پیشنهادی',
                         style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold),
-                        textAlign: TextAlign.right,
+                        textAlign: TextAlign.center,
                       ),
                     ),
-                    const SizedBox(width: 40),
+                    Align(
+                      alignment: Alignment.centerLeft,
+                      child: IconButton(
+                        onPressed: () => Navigator.pop(context),
+                        icon: SvgPicture.asset('assets/svg/back_arrow.svg', color: primary, width: 20, height: 20),
+                      ),
+                    ),
                   ],
                 ),
               ),
               const Padding(
-                padding: EdgeInsets.fromLTRB(16, 0, 16, 12),
+                padding: EdgeInsets.fromLTRB(16, 0, 16, 8),
                 child: Align(
-                  alignment: Alignment.centerRight,
+                  alignment: Alignment.center,
                   child: Text(
                     'براساس امتیاز کاربران، زیباترین‌ها انتخاب شده است',
                     style: TextStyle(color: AppColors.gray, fontSize: 12),
+                    textAlign: TextAlign.center,
                   ),
                 ),
               ),
-              divider,
               Expanded(
                 child: Consumer<AttractionsController>(
                   builder: (context, c, _) {
                     if (c.loading && c.top10Items.isEmpty) {
                       return RefreshIndicator(
                         onRefresh: _onRefresh,
-                        child: ListView.separated(
+                        child: ListView.builder(
                           physics: const AlwaysScrollableScrollPhysics(),
                           padding: const EdgeInsets.fromLTRB(12, 12, 12, 24),
-                          itemBuilder: (_, i) => const _CardSkeleton(),
-                          separatorBuilder: (_, __) => divider,
                           itemCount: 10,
+                          itemBuilder: (_, __) => const _CardSkeleton(),
                         ),
                       );
                     }
@@ -105,18 +107,23 @@ class _SuggestedAttractionsPageState extends State<SuggestedAttractionsPage> {
                     }
                     return RefreshIndicator(
                       onRefresh: _onRefresh,
-                      child: ListView.separated(
+                      child: ListView.builder(
                         padding: const EdgeInsets.fromLTRB(12, 12, 12, 24),
                         itemCount: c.top10Items.length,
-                        separatorBuilder: (_, __) => divider,
                         itemBuilder: (context, index) {
                           final item = c.top10Items[index];
-                          return SuggestedAttractionCard(
-                            item: item,
-                            baseUrl: widget.baseUrl,
-                            onTap: () {
-                              Navigator.of(context).pushNamed('/attraction/detail', arguments: item.id);
-                            },
+                          final rank = index + 1;
+                          return Padding(
+                            padding: const EdgeInsets.only(bottom: 10),
+                            child: SuggestedAttractionCard(
+                              item: item,
+                              rank: rank,
+                              baseUrl: widget.baseUrl,
+                              primaryColor: primary, // ← برای ستاره و رتبه
+                              onTap: () {
+                                Navigator.of(context).pushNamed('/attraction', arguments: item.id);
+                              },
+                            ),
                           );
                         },
                       ),
@@ -137,17 +144,18 @@ class _CardSkeleton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      margin: const EdgeInsets.only(bottom: 12),
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
         color: AppColors.menuBackground,
         borderRadius: BorderRadius.circular(8),
       ),
       child: Row(
-        children: [
+        children: const [
+          SizedBox(width: 24),
+          SizedBox(width: 8),
           _Box(w: 50, h: 50, r: 8),
-          const SizedBox(width: 12),
-          const Expanded(
+          SizedBox(width: 12),
+          Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -157,8 +165,8 @@ class _CardSkeleton extends StatelessWidget {
               ],
             ),
           ),
-          const SizedBox(width: 12),
-          const Column(
+          SizedBox(width: 12),
+          Column(
             children: [
               _Box(w: 20, h: 20, r: 6),
               SizedBox(height: 6),

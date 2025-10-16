@@ -1,36 +1,46 @@
 import 'dart:math' as math;
 import 'package:aria/shared/styles/colors.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+
+import '../../../auth/presentation/controllers/auth_controller.dart';
 
 class AttractionBoxGrid extends StatelessWidget {
   const AttractionBoxGrid({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final user = context.watch<AuthController>().currentUser;
+    final provinceId = user?.province ?? user?.province ?? 0;
+
     final items = [
       {
         'title': 'جغرافیای\nاستان',
         'icon': 'assets/images/icons/7.png',
         'isNew': false,
         'route': '/about-province',
+        'needsProvince': false,
       },
       {
         'title': 'ماجراجویی\nدر طبیعت',
         'icon': 'assets/images/icons/1.png',
         'isNew': true,
         'route': null,
+        'needsProvince': false,
       },
       {
         'title': 'پیشنهادی\nگردشگران',
         'icon': 'assets/images/icons/3.png',
         'isNew': false,
-        'route': null,
+        'route': '/suggested-attractions',
+        'needsProvince': true,
       },
       {
         'title': 'جاذبه‌های\nگردشگری',
         'icon': 'assets/images/icons/2.png',
         'isNew': false,
         'route': '/province-attractions',
+        'needsProvince': true,
       },
     ];
 
@@ -52,6 +62,8 @@ class AttractionBoxGrid extends StatelessWidget {
           iconPath: item['icon'] as String,
           isNew: item['isNew'] as bool,
           route: item['route'] as String?,
+          needsProvince: item['needsProvince'] as bool,
+          provinceId: provinceId,
         );
       },
     );
@@ -63,12 +75,16 @@ class _AttractionBox extends StatelessWidget {
   final String iconPath;
   final bool isNew;
   final String? route;
+  final bool needsProvince;
+  final int provinceId;
 
   const _AttractionBox({
     required this.title,
     required this.iconPath,
     this.isNew = false,
     this.route,
+    this.needsProvince = false,
+    this.provinceId = 0,
   });
 
   @override
@@ -85,7 +101,17 @@ class _AttractionBox extends StatelessWidget {
         child: InkWell(
           borderRadius: BorderRadius.circular(10),
           onTap: route != null
-              ? () => Navigator.pushNamed(context, route!)
+              ? () {
+            if (needsProvince) {
+              Navigator.pushNamed(
+                context,
+                route!,
+                arguments: {'provinceId': provinceId, 'baseUrl': 'http://10.0.2.2:8000'},
+              );
+            } else {
+              Navigator.pushNamed(context, route!);
+            }
+          }
               : null,
           splashColor: Colors.white24,
           highlightColor: Colors.white10,
@@ -119,10 +145,7 @@ class _AttractionBox extends StatelessWidget {
                   top: 0,
                   left: 0,
                   child: Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 8,
-                      vertical: 4,
-                    ),
+                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                     decoration: BoxDecoration(
                       color: colorScheme.primary,
                       borderRadius: BorderRadius.circular(4),

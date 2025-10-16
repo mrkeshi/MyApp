@@ -4,7 +4,7 @@ from rest_framework.response import Response
 from django.db.models import Avg, Count
 from drf_spectacular.utils import extend_schema, OpenApiResponse
 from .models import Event, EventReview
-from .serializers import EventSerializer, EventReviewSerializer, EventReviewCreateSerializer
+from .serializers import EventSerializer, EventDetailSerializer, EventReviewSerializer, EventReviewCreateSerializer
 
 @extend_schema(
     tags=["Events"],
@@ -15,31 +15,32 @@ from .serializers import EventSerializer, EventReviewSerializer, EventReviewCrea
 class EventViewSet(mixins.ListModelMixin,
                    mixins.RetrieveModelMixin,
                    viewsets.GenericViewSet):
-    serializer_class = EventSerializer
     permission_classes = [permissions.IsAuthenticated]
+
+    def get_serializer_class(self):
+        if self.action == "retrieve":
+            return EventDetailSerializer
+        return EventSerializer
 
     def get_queryset(self):
         qs = Event.objects.all().annotate(
             average_rating=Avg("reviews__rating"),
             reviews_count=Count("reviews"),
-        )
+        ).prefetch_related("reviews__user")
         user = self.request.user
-
         if user.is_staff or user.is_superuser:
             province_id = self.request.query_params.get("province_id")
             if province_id:
                 qs = qs.filter(province_id=province_id)
             return qs
-
         if getattr(user, "province_id", None):
             return qs.filter(province_id=user.province_id)
-
         return qs.none()
 
     @extend_schema(
         tags=["Events"],
         summary="Retrieve event (user's province only)",
-        responses={200: EventSerializer}
+        responses={200: EventDetailSerializer}
     )
     def retrieve(self, request, *args, **kwargs):
         return super().retrieve(request, *args, **kwargs)

@@ -21,7 +21,7 @@ class AttractionSlider extends StatefulWidget {
     this.viewportFraction = 1,
     this.outerClipRadius = 8,
     this.cardRadius = 20,
-    this.pageHorizontalMargin = const EdgeInsets.symmetric(horizontal: 6),
+    this.pageHorizontalMargin = EdgeInsets.zero,
     this.ctaText = 'بزن بریم',
     this.indicatorActiveColor,
     this.indicatorInactiveColor,
@@ -99,16 +99,9 @@ class _AttractionSliderState extends State<AttractionSlider> {
               itemBuilder: (context, index) {
                 final attraction = attractions[index];
                 return Container(
-                  margin: widget.pageHorizontalMargin,
+                  margin: EdgeInsets.zero,
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(12),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withOpacity(0.2),
-                        blurRadius: 8,
-                        offset: const Offset(0, 2),
-                      ),
-                    ],
                   ),
                   child: ClipRRect(
                     borderRadius: BorderRadius.circular(widget.cardRadius),
@@ -138,10 +131,13 @@ class _AttractionSliderState extends State<AttractionSlider> {
                           child: ElevatedButton(
                             style: ElevatedButton.styleFrom(
                               backgroundColor: Theme.of(context).primaryColor,
-                              padding: const EdgeInsets.symmetric(horizontal: 8),
+                              padding: const EdgeInsets.symmetric(horizontal: 12),
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(8),
                               ),
+                              fixedSize: const Size(70, 28),
+                              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                              visualDensity: const VisualDensity(horizontal: 0, vertical: -4),
                             ),
                             onPressed: () {
                               if (widget.onTapCta != null) {

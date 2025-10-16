@@ -1,123 +1,193 @@
-import 'dart:ui' show FontFeature;
+import 'dart:ui' show FontFeature, ImageFilter;
 import 'package:flutter/material.dart';
 import 'package:aria/shared/styles/colors.dart';
-import '../../../../core/utils/formatters.dart' show toFaDigits;
-import '../../domain/entities/attraction.dart';
-
-import 'dart:ui' show FontFeature;
-import 'package:flutter/material.dart';
-import 'package:aria/shared/styles/colors.dart';
-import '../../../../core/utils/formatters.dart' show faDigits; // ← تابع شما
+import '../../../../core/utils/formatters.dart' show faDigits;
 import '../../domain/entities/attraction.dart';
 
 class SuggestedAttractionCard extends StatelessWidget {
   final Attraction item;
+  final int rank;
   final VoidCallback? onTap;
   final double radius;
   final double thumbSize;
   final Color? cardColor;
   final String? baseUrl;
+  final Color? primaryColor;
+  final double? cardHeight;
+  final EdgeInsetsGeometry margin;
 
   const SuggestedAttractionCard({
     Key? key,
     required this.item,
+    required this.rank,
     this.onTap,
     this.radius = 8.0,
     this.thumbSize = 50.0,
     this.cardColor,
     this.baseUrl,
+    this.primaryColor,
+    this.cardHeight,
+    this.margin = const EdgeInsets.only(bottom: 10),
   }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     final bg = cardColor ?? AppColors.menuBackground;
-    final ratingFa = faDigits(item.averageRating.toStringAsFixed(2)); // ← اینجا استفاده شد
+    final ratingFa = faDigits(item.averageRating.toStringAsFixed(2));
+    final rankFa = faDigits(rank.toString());
+    final primary = primaryColor ?? Theme.of(context).colorScheme.primary;
+    final h = cardHeight ?? (thumbSize + 24);
 
     return Directionality(
       textDirection: TextDirection.rtl,
       child: Container(
-        margin: const EdgeInsets.only(bottom: 12),
-        decoration: BoxDecoration(
-          color: bg,
-          borderRadius: BorderRadius.circular(radius),
-        ),
-        child: Material(
-          color: Colors.transparent,
-          child: InkWell(
-            borderRadius: BorderRadius.circular(radius),
-            onTap: onTap,
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  ClipRRect(
-                    borderRadius: BorderRadius.circular(8),
-                    child: _ThumbImage(
-                      url: item.coverImage,
-                      size: thumbSize,
-                      baseUrl: baseUrl,
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Text(
-                          item.title,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          textAlign: TextAlign.right,
-                          style: const TextStyle(
-                            wordSpacing: -3,
-                            color: Colors.white,
-                            fontSize: 15,
-                            fontWeight: FontWeight.w400,
-                            height: 1,
+        margin: margin,
+        child: Stack(
+          clipBehavior: Clip.none,
+          children: [
+            Container(
+              decoration: BoxDecoration(
+                color: bg,
+                borderRadius: BorderRadius.circular(radius),
+              ),
+              child: Material(
+                color: Colors.transparent,
+                child: InkWell(
+                  borderRadius: BorderRadius.circular(radius),
+                  onTap: onTap,
+                  child: SizedBox(
+                    height: h,
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          ClipRRect(
+                            borderRadius: BorderRadius.circular(8),
+                            child: _ThumbImage(
+                              url: item.coverImage,
+                              size: thumbSize,
+                              baseUrl: baseUrl,
+                            ),
                           ),
-                        ),
-                        const SizedBox(height: 8),
-                        Text(
-                          item.shortDescription.isNotEmpty
-                              ? item.shortDescription
-                              : 'بدون توضیحات',
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          textAlign: TextAlign.right,
-                          style: const TextStyle(
-                            color: AppColors.gray,
-                            fontSize: 12.5,
-                            height: 1.2,
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Text(
+                                  item.title,
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  textAlign: TextAlign.right,
+                                  style: const TextStyle(
+                                    wordSpacing: -3,
+                                    color: Colors.white,
+                                    fontSize: 15,
+                                    fontWeight: FontWeight.w400,
+                                    height: 1,
+                                  ),
+                                ),
+                                const SizedBox(height: 8),
+                                Text(
+                                  item.shortDescription.isNotEmpty
+                                      ? item.shortDescription
+                                      : 'بدون توضیحات',
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  textAlign: TextAlign.right,
+                                  style: const TextStyle(
+                                    color: AppColors.gray,
+                                    fontSize: 12.5,
+                                    height: 1.2,
+                                  ),
+                                ),
+                              ],
+                            ),
                           ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  Column(
-                    mainAxisSize: MainAxisSize.min,
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      const Icon(Icons.star_rounded, color: Colors.amber, size: 20),
-                      const SizedBox(height: 4),
-                      Text(
-                        ratingFa,
-                        textAlign: TextAlign.center,
-                        style: const TextStyle(
-                          color: Colors.white70,
-                          fontSize: 12.5,
-                          fontFeatures: [FontFeature.tabularFigures()],
-                        ),
+                          const SizedBox(width: 12),
+                          Column(
+                            mainAxisSize: MainAxisSize.min,
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children: [
+                              Icon(Icons.star_rounded, color: primary, size: 20),
+                              const SizedBox(height: 4),
+                              Text(
+                                ratingFa,
+                                textAlign: TextAlign.center,
+                                style: const TextStyle(
+                                  color: Colors.white70,
+                                  fontSize: 12.5,
+                                  fontFeatures: [FontFeature.tabularFigures()],
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
                       ),
-                    ],
+                    ),
                   ),
-                ],
+                ),
+              ),
+            ),
+            Positioned(
+              top: -10,
+              left: 8,
+              child: _CornerRankBadge(
+                label: rankFa,
+                color: primary,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _CornerRankBadge extends StatelessWidget {
+  final String label;
+  final Color color;
+
+  const _CornerRankBadge({
+    Key? key,
+    required this.label,
+    required this.color,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(6),
+      child: Stack(
+        alignment: Alignment.center,
+        children: [
+          BackdropFilter(
+            filter: ImageFilter.blur(sigmaX: 2, sigmaY: 2),
+            child: const SizedBox(width: 34, height: 20),
+          ),
+          Container(
+            width: 34,
+            height: 20,
+            alignment: Alignment.center,
+            decoration: BoxDecoration(
+              color: const Color(0xFF333333),
+              borderRadius: BorderRadius.circular(6),
+            ),
+            child: Text(
+              label,
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                color: color,
+                fontSize: 11,
+                fontWeight: FontWeight.w800,
+                height: 1,
+                fontFeatures: const [FontFeature.tabularFigures()],
               ),
             ),
           ),
-        ),
+        ],
       ),
     );
   }
@@ -127,7 +197,9 @@ class _ThumbImage extends StatefulWidget {
   final String url;
   final double size;
   final String? baseUrl;
-  const _ThumbImage({Key? key, required this.url, required this.size, this.baseUrl}) : super(key: key);
+
+  const _ThumbImage({Key? key, required this.url, required this.size, this.baseUrl})
+      : super(key: key);
 
   @override
   State<_ThumbImage> createState() => _ThumbImageState();
@@ -140,7 +212,8 @@ class _ThumbImageState extends State<_ThumbImage> {
   String _abs(String url) {
     if (url.isEmpty) return url;
     if (url.startsWith('http://') || url.startsWith('https://')) return url;
-    final base = widget.baseUrl?.trim().replaceAll(RegExp(r'/$'), '') ?? 'http://10.0.2.2:8000';
+    final base =
+        widget.baseUrl?.trim().replaceAll(RegExp(r'/$'), '') ?? 'http://10.0.2.2:8000';
     final path = url.trim().startsWith('/') ? url.trim() : '/${url.trim()}';
     return '$base$path';
   }
@@ -204,7 +277,13 @@ class _ShimmerBox extends StatefulWidget {
   final double width;
   final double height;
   final double radius;
-  const _ShimmerBox({Key? key, required this.width, required this.height, this.radius = 12}) : super(key: key);
+
+  const _ShimmerBox({
+    Key? key,
+    required this.width,
+    required this.height,
+    this.radius = 12,
+  }) : super(key: key);
 
   @override
   State<_ShimmerBox> createState() => _ShimmerBoxState();
@@ -212,10 +291,12 @@ class _ShimmerBox extends StatefulWidget {
 
 class _ShimmerBoxState extends State<_ShimmerBox> with SingleTickerProviderStateMixin {
   late final AnimationController _ac;
+
   @override
   void initState() {
     super.initState();
-    _ac = AnimationController(vsync: this, duration: const Duration(milliseconds: 1100))..repeat();
+    _ac = AnimationController(vsync: this, duration: const Duration(milliseconds: 1100))
+      ..repeat();
   }
 
   @override
@@ -243,7 +324,11 @@ class _ShimmerBoxState extends State<_ShimmerBox> with SingleTickerProviderState
                     gradient: LinearGradient(
                       begin: Alignment(-1, -0.2),
                       end: Alignment(1, 0.2),
-                      colors: [Color(0x00232323), Color(0x44FFFFFF), Color(0x00232323)],
+                      colors: [
+                        Color(0x00232323),
+                        Color(0x44FFFFFF),
+                        Color(0x00232323),
+                      ],
                       stops: [0.35, 0.5, 0.65],
                     ),
                   ),
