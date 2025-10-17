@@ -9,7 +9,7 @@ def event_cover_upload_path(instance, filename):
     return f"events/covers/{pid}/{filename}"
 
 class Event(models.Model):
-    province = models.OneToOneField("Province.Province", on_delete=models.CASCADE, related_name="event")
+    province = models.ForeignKey("Province.Province", on_delete=models.CASCADE, related_name="event")
     title = models.CharField(max_length=200)
     short_description = models.CharField(max_length=500)
     description = models.TextField()

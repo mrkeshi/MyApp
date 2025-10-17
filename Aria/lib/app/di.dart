@@ -29,6 +29,11 @@ import 'package:aria/features/bookmark/data/datasources/bookmark_remote_data_sou
 import 'package:aria/features/bookmark/data/repositories/bookmark_repository_impl.dart';
 import 'package:aria/features/bookmark/domain/repositories/bookmark_repository.dart';
 
+import '../features/event/data/datasources/event_remote_data_source.dart';
+import '../features/event/data/repositories/event_repository_impl.dart';
+import '../features/event/domain/repositories/event_repository.dart';
+import '../features/event/presentation/controller/events_controller.dart';
+
 class AppDI {
   static DioClient buildDioClient() {
     const baseUrl =
@@ -55,12 +60,16 @@ class AppDI {
     final bookmarkRemote = BookmarkRemoteDataSource(dio);
     final BookmarkRepository bookmarkRepo = BookmarkRepositoryImpl(bookmarkRemote);
 
+    final eventRemote = EventRemoteDataSource(dio);
+    final EventRepository eventRepo = EventRepositoryImpl(eventRemote);
+
     return [
       Provider<AuthRepository>.value(value: authRepo),
       Provider<ProvinceRepository>.value(value: provinceRepo),
       Provider<PhotoRepository>.value(value: photoRepo),
       Provider<AttractionRepository>.value(value: attractionRepo),
       Provider<BookmarkRepository>.value(value: bookmarkRepo),
+      Provider<EventRepository>.value(value: eventRepo),
 
       ChangeNotifierProvider<ProvinceController>(
         create: (_) => ProvinceController(provinceRepo),
@@ -85,6 +94,10 @@ class AppDI {
 
       ChangeNotifierProvider<AttractionsController>(
         create: (ctx) => AttractionsController(attractionRepo),
+      ),
+
+      ChangeNotifierProvider<EventsController>(
+        create: (ctx) => EventsController(ctx.read<EventRepository>()),
       ),
     ];
   }

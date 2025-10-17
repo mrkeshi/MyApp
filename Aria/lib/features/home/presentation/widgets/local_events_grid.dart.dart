@@ -59,8 +59,7 @@ class LocalEventsGrid extends StatelessWidget {
                 iconPaddingRight: 0,
                 spaceBetweenTextAndIcon: 0,
                 textOffset: const Offset(8, 0),
-                onTap: () {
-                },
+                onTap: () {},
               ),
               const SizedBox(height: 10),
               _LocalEventBoxLeft(
@@ -75,9 +74,7 @@ class LocalEventsGrid extends StatelessWidget {
                 iconPaddingRight: 0,
                 spaceBetweenTextAndIcon: 0,
                 textOffset: const Offset(0, 0),
-                onTap: () {
-                  print("Tapped ${items[2]['title']}");
-                },
+                onTap: () {},
               ),
             ],
           ),
@@ -95,9 +92,7 @@ class LocalEventsGrid extends StatelessWidget {
             height: 162,
             iconOffset: const Offset(0, 8),
             textOffset: const Offset(0, 0),
-            onTap: () {
-              print("Tapped ${items[0]['title']}");
-            },
+            onTap: () => Navigator.of(context).pushNamed('/events'),
           ),
         ),
       ],
@@ -286,7 +281,7 @@ class _LocalEventBoxRight extends StatelessWidget {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Transform.translate(
-                      offset: Offset(0, 10),
+                      offset: const Offset(0, 10),
                       child: Column(
                         children: [
                           Text(
@@ -314,7 +309,7 @@ class _LocalEventBoxRight extends StatelessWidget {
                     ),
                     const SizedBox(height: 2),
                     Transform.translate(
-                      offset: Offset(0, 13),
+                      offset: const Offset(0, 13),
                       child: Image.asset(
                         iconPath,
                         width: 120,
