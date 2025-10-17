@@ -1,123 +1,128 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import '../../../../shared/styles/colors.dart';
 import '../../domain/entities/event_detail.dart';
 import '../controller/events_controller.dart';
-import 'event_review_form_page.dart';
+import '../widgets/event_header_card.dart' as hdr;
+import '../widgets/event_info_card.dart';
+import '../widgets/event_tabs_row.dart';
+import '../widgets/event_details_section.dart' as det;
+import '../widgets/event_map_section.dart' as mapsec;
+import '../widgets/event_reviews_section.dart' as rev;
 
-class EventDetailPage extends StatefulWidget {
-  final int eventId;
-  const EventDetailPage({super.key, required this.eventId});
+class EventDetailStyledPage extends StatefulWidget {
+  final int id;
+  const EventDetailStyledPage({super.key, required this.id});
+
   @override
-  State<EventDetailPage> createState() => _EventDetailPageState();
+  State<EventDetailStyledPage> createState() => _EventDetailStyledPageState();
 }
 
-class _EventDetailPageState extends State<EventDetailPage> {
+class _EventDetailStyledPageState extends State<EventDetailStyledPage> {
+  late Future<EventDetail?> _future;
+  int _tabIndex = 1;
+
   @override
   void initState() {
     super.initState();
-    Future.microtask(() => context.read<EventsController>().fetchDetail(widget.eventId));
+    Future.microtask(() {
+      _future = context.read<EventsController>().fetchDetail(widget.id);
+      setState(() {});
+    });
+  }
+
+  Future<void> _refresh() async {
+    final f = context.read<EventsController>().fetchDetail(widget.id, force: true);
+    setState(() => _future = f);
+    await f;
   }
 
   @override
   Widget build(BuildContext context) {
-    final vm = context.watch<EventsController>();
-    final detail = vm.getCachedDetail(widget.eventId);
-    return Scaffold(
-      appBar: AppBar(title: Text(detail?.title ?? 'جزئیات رویداد')),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () async {
-          final result = await Navigator.of(context).push<Map<String, dynamic>>(
-            MaterialPageRoute(builder: (_) => EventReviewFormPage()),
-          );
-          if (result != null) {
-            await vm.submitMyReview(widget.eventId, rating: result['rating'] as int, comment: result['comment'] as String);
-          }
-        },
-        child: const Icon(Icons.rate_review),
-      ),
-      body: detail == null ? const Center(child: CircularProgressIndicator()) : _Body(detail: detail),
-    );
-  }
-}
+    return Directionality(
+      textDirection: TextDirection.rtl,
+      child: Scaffold(
+        backgroundColor: AppColors.black,
+        appBar: AppBar(
+          automaticallyImplyLeading: false,
+          toolbarHeight: 0,
+          backgroundColor: AppColors.black,
+          elevation: 0,
+        ),
 
-class _Body extends StatelessWidget {
-  final EventDetail detail;
-  const _Body({required this.detail});
+        body: RefreshIndicator(
+          onRefresh: _refresh,
+          child: FutureBuilder<EventDetail?>(
+            future: _future,
+            builder: (context, s) {
+              if (s.connectionState == ConnectionState.waiting) {
+                return ListView(
+                  physics: const AlwaysScrollableScrollPhysics(),
+                  padding: const EdgeInsets.all(12),
+                  children: const [
+                    SizedBox(height: 240),
+                    Center(child: CircularProgressIndicator()),
+                  ],
+                );
+              }
 
-  @override
-  Widget build(BuildContext context) {
-    final styleLabel = Theme.of(context).textTheme.bodySmall;
-    return SingleChildScrollView(
-      padding: const EdgeInsets.all(16),
-      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-        if (detail.coverImage.isNotEmpty)
-          ClipRRect(
-            borderRadius: BorderRadius.circular(16),
-            child: AspectRatio(
-              aspectRatio: 16 / 9,
-              child: Image.network(detail.coverImage, fit: BoxFit.cover),
-            ),
-          ),
-        const SizedBox(height: 12),
-        Text(detail.title, style: Theme.of(context).textTheme.titleLarge),
-        const SizedBox(height: 6),
-        Text(detail.shortDescription),
-        const SizedBox(height: 12),
-        Row(children: [
-          Text('میانگین امتیاز: ', style: styleLabel),
-          Text(detail.averageRating.toStringAsFixed(1)),
-          const SizedBox(width: 8),
-          Text('تعداد نظرات: ', style: styleLabel),
-          Text(detail.reviewsCount.toString()),
-        ]),
-        const SizedBox(height: 12),
-        Text('محل برگزاری: ${detail.venue}'),
-        const SizedBox(height: 6),
-        Text('زمان شروع: ${detail.startAt.toLocal()}'),
-        const SizedBox(height: 12),
-        Text(detail.description),
-        const SizedBox(height: 16),
-        Text('نظرات کاربران', style: Theme.of(context).textTheme.titleMedium),
-        const SizedBox(height: 8),
-        if (detail.reviews.isEmpty)
-          const Text('نظری ثبت نشده است')
-        else
-          Column(
-            children: detail.reviews
-                .map((r) => Container(
-              margin: const EdgeInsets.only(bottom: 10),
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: Theme.of(context).colorScheme.surface,
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
+              if (s.hasError) {
+                return ListView(
+                  physics: const AlwaysScrollableScrollPhysics(),
+                  padding: const EdgeInsets.all(12),
+                  children: [
+                    const SizedBox(height: 200),
+                    Center(
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          const Icon(Icons.error_outline, color: Colors.white54, size: 40),
+                          const SizedBox(height: 12),
+                          const Text('خطا در دریافت اطلاعات', style: TextStyle(color: Colors.white70)),
+                          const SizedBox(height: 8),
+                          TextButton(
+                            onPressed: _refresh,
+                            child: const Text('تلاش مجدد', style: TextStyle(color: Colors.white)),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                );
+              }
+
+              final data = s.data;
+              if (data == null) {
+                return ListView(
+                  physics: const AlwaysScrollableScrollPhysics(),
+                  padding: const EdgeInsets.all(12),
+                  children: const [
+                    SizedBox(height: 200),
+                    Center(child: Text('چیزی پیدا نشد', style: TextStyle(color: Colors.white70))),
+                  ],
+                );
+              }
+
+              return ListView(
+                padding: const EdgeInsets.fromLTRB(12, 8, 12, 24),
+                physics: const AlwaysScrollableScrollPhysics(),
                 children: [
-                  CircleAvatar(backgroundImage: r.profileImage.isNotEmpty ? NetworkImage(r.profileImage) : null, child: r.profileImage.isEmpty ? const Icon(Icons.person) : null),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                      Row(children: [
-                        Expanded(child: Text(r.userDisplay, style: const TextStyle(fontWeight: FontWeight.bold))),
-                        const Icon(Icons.star, size: 16),
-                        const SizedBox(width: 4),
-                        Text(r.rating.toString()),
-                      ]),
-                      const SizedBox(height: 6),
-                      Text(r.comment),
-                      const SizedBox(height: 6),
-                      Text(r.createdAt.toLocal().toString(), style: Theme.of(context).textTheme.bodySmall),
-                    ]),
-                  )
+                  hdr.EventHeaderCard(data: data),
+                  const SizedBox(height: 8),
+                  EventInfoCard(data: data),
+                  const SizedBox(height: 12),
+                  EventTabsRow(index: _tabIndex, onChanged: (i) => setState(() => _tabIndex = i)),
+                  const SizedBox(height: 12),
+                  if (_tabIndex == 0) det.EventDetailsSection(data: data),
+                  if (_tabIndex == 1) mapsec.EventMapSection(data: data),
+                  if (_tabIndex == 2) rev.EventReviewsSection(data: data),
                 ],
-              ),
-            ))
-                .toList(),
+              );
+            },
           ),
-        const SizedBox(height: 80),
-      ]),
+        ),
+      ),
     );
   }
 }

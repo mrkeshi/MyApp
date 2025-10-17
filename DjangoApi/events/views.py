@@ -1,20 +1,25 @@
+from django.db.models import Avg, Count
 from rest_framework import viewsets, mixins, permissions, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
-from django.db.models import Avg, Count
 from drf_spectacular.utils import extend_schema, OpenApiResponse
+
 from .models import Event, EventReview
-from .serializers import EventSerializer, EventDetailSerializer, EventReviewSerializer, EventReviewCreateSerializer
+from .serializers import (
+    EventSerializer,
+    EventDetailSerializer,
+    EventReviewSerializer,
+    EventReviewCreateSerializer,
+)
+
 
 @extend_schema(
     tags=["Events"],
     summary="List events (user's province)",
     description="Returns events only for the authenticated user's province. Staff users see all.",
-    responses={200: OpenApiResponse(response=EventSerializer(many=True), description="Event list")}
+    responses={200: OpenApiResponse(response=EventSerializer(many=True), description="Event list")},
 )
-class EventViewSet(mixins.ListModelMixin,
-                   mixins.RetrieveModelMixin,
-                   viewsets.GenericViewSet):
+class EventViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin, viewsets.GenericViewSet):
     permission_classes = [permissions.IsAuthenticated]
 
     def get_serializer_class(self):
@@ -23,10 +28,11 @@ class EventViewSet(mixins.ListModelMixin,
         return EventSerializer
 
     def get_queryset(self):
-        qs = Event.objects.all().annotate(
-            average_rating=Avg("reviews__rating"),
-            reviews_count=Count("reviews"),
-        ).prefetch_related("reviews__user")
+        qs = (
+            Event.objects.all()
+            .annotate(average_rating=Avg("reviews__rating"), reviews_count=Count("reviews"))
+            .prefetch_related("reviews__user")
+        )
         user = self.request.user
         if user.is_staff or user.is_superuser:
             province_id = self.request.query_params.get("province_id")
@@ -40,7 +46,7 @@ class EventViewSet(mixins.ListModelMixin,
     @extend_schema(
         tags=["Events"],
         summary="Retrieve event (user's province only)",
-        responses={200: EventDetailSerializer}
+        responses={200: EventDetailSerializer},
     )
     def retrieve(self, request, *args, **kwargs):
         return super().retrieve(request, *args, **kwargs)
@@ -48,43 +54,45 @@ class EventViewSet(mixins.ListModelMixin,
     @extend_schema(
         tags=["Events"],
         summary="List reviews of an event",
-        responses={200: OpenApiResponse(response=EventReviewSerializer(many=True), description="Reviews")}
+        responses={200: OpenApiResponse(response=EventReviewSerializer(many=True), description="Reviews")},
     )
     @action(detail=True, methods=["get"], url_path="reviews", permission_classes=[permissions.IsAuthenticated])
     def reviews(self, request, pk=None):
         event = self.get_object()
         qs = event.reviews.select_related("user").all()
         ser = EventReviewSerializer(qs, many=True, context={"request": request})
-        return Response(ser.data)
+        return Response(ser.data, status=status.HTTP_200_OK)
 
     @extend_schema(
         tags=["Events"],
-        summary="Create or update my review",
+        summary="Get or upsert my review",
         request=EventReviewCreateSerializer,
-        responses={200: OpenApiResponse(response=EventReviewSerializer, description="Upserted review")},
+        responses={
+            200: OpenApiResponse(response=EventReviewSerializer, description="Existing or updated review"),
+            201: OpenApiResponse(response=EventReviewSerializer, description="Created review"),
+            204: OpenApiResponse(description="No review yet (GET)"),
+        },
     )
-    @action(detail=True, methods=["post"], url_path="reviews/my", permission_classes=[permissions.IsAuthenticated])
-    def upsert_my_review(self, request, pk=None):
+    @action(detail=True, methods=["get", "post"], url_path="reviews/my", permission_classes=[permissions.IsAuthenticated])
+    def my_review(self, request, pk=None):
         event = self.get_object()
+
+        if request.method.lower() == "get":
+            obj = EventReview.objects.filter(event=event, user=request.user).select_related("user").first()
+            if not obj:
+                return Response(status=status.HTTP_204_NO_CONTENT)
+            return Response(EventReviewSerializer(obj, context={"request": request}).data, status=status.HTTP_200_OK)
+
         ser = EventReviewCreateSerializer(data=request.data)
         ser.is_valid(raise_exception=True)
         rating = ser.validated_data["rating"]
         comment = ser.validated_data.get("comment", "")
-        obj, _ = EventReview.objects.update_or_create(
-            event=event, user=request.user,
-            defaults={"rating": rating, "comment": comment}
+        obj, created = EventReview.objects.update_or_create(
+            event=event,
+            user=request.user,
+            defaults={"rating": rating, "comment": comment},
         )
-        return Response(EventReviewSerializer(obj, context={"request": request}).data, status=status.HTTP_200_OK)
-
-    @extend_schema(
-        tags=["Events"],
-        summary="Get my review",
-        responses={200: OpenApiResponse(response=EventReviewSerializer, description="My review or 204 if none")},
-    )
-    @action(detail=True, methods=["get"], url_path="reviews/my", permission_classes=[permissions.IsAuthenticated])
-    def get_my_review(self, request, pk=None):
-        event = self.get_object()
-        obj = EventReview.objects.filter(event=event, user=request.user).first()
-        if not obj:
-            return Response(status=status.HTTP_204_NO_CONTENT)
-        return Response(EventReviewSerializer(obj, context={"request": request}).data, status=status.HTTP_200_OK)
+        return Response(
+            EventReviewSerializer(obj, context={"request": request}).data,
+            status=status.HTTP_201_CREATED if created else status.HTTP_200_OK,
+        )

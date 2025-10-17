@@ -97,7 +97,10 @@ class AppDI {
       ),
 
       ChangeNotifierProvider<EventsController>(
-        create: (ctx) => EventsController(ctx.read<EventRepository>()),
+          create: (ctx) => EventsController(
+            ctx.read<EventRepository>(),
+            ctx.read<BookmarkRepository>(),
+          ),
       ),
     ];
   }

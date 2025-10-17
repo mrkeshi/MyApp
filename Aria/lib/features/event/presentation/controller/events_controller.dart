@@ -1,5 +1,8 @@
+// lib/features/event/presentation/controller/events_controller.dart
 import 'package:flutter/foundation.dart';
 import 'package:dio/dio.dart';
+
+import 'package:aria/features/bookmark/domain/repositories/bookmark_repository.dart';
 
 import '../../domain/entities/event.dart';
 import '../../domain/entities/event_detail.dart';
@@ -7,7 +10,8 @@ import '../../domain/repositories/event_repository.dart';
 
 class EventsController extends ChangeNotifier {
   final EventRepository repository;
-  EventsController(this.repository);
+  final BookmarkRepository bookmarks;
+  EventsController(this.repository, this.bookmarks);
 
   final List<Event> _items = [];
   List<Event> get items => List.unmodifiable(_items);
@@ -26,11 +30,62 @@ class EventsController extends ChangeNotifier {
   String? _error;
   String? get error => _error;
 
+  final Set<int> _bookmarkedIds = {};
+  bool _bookmarksLoaded = false;
+  final Set<int> _bookmarkLoading = {};
+
   void clearDetailCache() {
     _detailCache.clear();
   }
 
   EventDetail? getCachedDetail(int id) => _detailCache[id];
+
+  bool isBookmarked(int id) => _bookmarkedIds.contains(id);
+  bool isBookmarkLoading(int id) => _bookmarkLoading.contains(id);
+
+  Future<void> loadBookmarks({bool force = false}) async {
+    if (_bookmarksLoaded && !force) return;
+    try {
+      final ids = await bookmarks.listIds(type: 'event');
+      _bookmarkedIds
+        ..clear()
+        ..addAll(ids);
+      _bookmarksLoaded = true;
+      notifyListeners();
+    } catch (e, st) {
+      if (kDebugMode) print('❌ loadBookmarks error: $e\n$st');
+    }
+  }
+
+  Future<void> toggleBookmark(int eventId) async {
+    if (_bookmarkLoading.contains(eventId)) return;
+    _bookmarkLoading.add(eventId);
+    final old = _bookmarkedIds.contains(eventId);
+    if (old) {
+      _bookmarkedIds.remove(eventId);
+    } else {
+      _bookmarkedIds.add(eventId);
+    }
+    notifyListeners();
+    try {
+      final res = await bookmarks.toggle(type: 'event', id: eventId);
+      if (res) {
+        _bookmarkedIds.add(eventId);
+      } else {
+        _bookmarkedIds.remove(eventId);
+      }
+    } catch (e, st) {
+      if (kDebugMode) print('❌ toggleBookmark error: $e\n$st');
+      if (old) {
+        _bookmarkedIds.add(eventId);
+      } else {
+        _bookmarkedIds.remove(eventId);
+      }
+    } finally {
+      _bookmarkLoading.remove(eventId);
+      notifyListeners();
+    }
+  }
 
   String _friendlyMessageFromError(Object e) {
     const fallback = 'خطا رخ داد. لطفاً دوباره تلاش کنید';
@@ -72,7 +127,6 @@ class EventsController extends ChangeNotifier {
     return fallback;
   }
 
-  // ====== List ======
   Future<void> fetchAll({bool force = false}) async {
     if (_loadingList) return;
     if (!force && _hasFetchedAll) return;
@@ -87,6 +141,7 @@ class EventsController extends ChangeNotifier {
         ..clear()
         ..addAll(res);
       _hasFetchedAll = true;
+      await loadBookmarks();
     } catch (e, st) {
       if (kDebugMode) print('❌ fetchAll error: $e\n$st');
       _error = 'خطا در دریافت رویدادها';
@@ -100,10 +155,10 @@ class EventsController extends ChangeNotifier {
   Future<void> refreshAll() async {
     if (_loadingList) return;
     await fetchAll(force: true);
+    await loadBookmarks(force: true);
   }
 
   Future<EventDetail?> fetchDetail(int id, {bool force = false}) {
-    // از کش
     if (!force && _detailCache.containsKey(id)) {
       return SynchronousFuture(_detailCache[id]!);
     }
@@ -122,6 +177,7 @@ class EventsController extends ChangeNotifier {
       final detail = await repository.getEventDetail(id);
       if (detail != null) {
         _detailCache[id] = detail;
+        await loadBookmarks();
         notifyListeners();
       }
       return detail;

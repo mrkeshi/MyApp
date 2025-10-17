@@ -84,10 +84,20 @@ class AppRouter {
       case '/event': {
         final args = settings.arguments;
         final int id = args is int ? args : (args is Map && args['id'] is int ? args['id'] as int : 0);
-        return MaterialPageRoute(builder: (_) => EventDetailPage(eventId: id));
+        return MaterialPageRoute(builder: (_) => EventDetailStyledPage( id: id,));
       }
-      case '/event-review':
-        return MaterialPageRoute(builder: (_) => const EventReviewFormPage());
+      case '/event/review': {
+        final args = settings.arguments;
+        final int eventId = args is int
+            ? args
+            : (args is Map && args['id'] is int
+            ? args['id'] as int
+            : 0);
+
+        return MaterialPageRoute(
+          builder: (_) => EventReviewFormSheet(eventId: eventId),
+        );
+      }
       default:
         return MaterialPageRoute(
           builder: (_) => const Scaffold(
