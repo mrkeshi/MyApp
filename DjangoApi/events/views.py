@@ -1,4 +1,5 @@
-from django.db.models import Avg, Count
+from django.db.models import Avg, Count, F, ExpressionWrapper, DurationField, Value
+from django.utils import timezone
 from rest_framework import viewsets, mixins, permissions, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
@@ -11,12 +12,10 @@ from .serializers import (
     EventReviewSerializer,
     EventReviewCreateSerializer,
 )
-
-
 @extend_schema(
     tags=["Events"],
     summary="List events (user's province)",
-    description="Returns events only for the authenticated user's province. Staff users see all.",
+    description="Returns events only for the authenticated user's province. Staff users see all. Sorted by least time-left to start.",
     responses={200: OpenApiResponse(response=EventSerializer(many=True), description="Event list")},
 )
 class EventViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin, viewsets.GenericViewSet):
@@ -28,19 +27,30 @@ class EventViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin, viewsets.Ge
         return EventSerializer
 
     def get_queryset(self):
+        now = timezone.now()
+
         qs = (
-            Event.objects.all()
-            .annotate(average_rating=Avg("reviews__rating"), reviews_count=Count("reviews"))
+            Event.objects.filter(start_at__gte=now)
+            .annotate(
+                average_rating=Avg("reviews__rating"),
+                reviews_count=Count("reviews"),
+                time_left=ExpressionWrapper(F("start_at") - Value(now), output_field=DurationField()),
+            )
             .prefetch_related("reviews__user")
+            .order_by("time_left", "province_id")
         )
+
         user = self.request.user
+
         if user.is_staff or user.is_superuser:
             province_id = self.request.query_params.get("province_id")
             if province_id:
                 qs = qs.filter(province_id=province_id)
             return qs
+
         if getattr(user, "province_id", None):
             return qs.filter(province_id=user.province_id)
+
         return qs.none()
 
     @extend_schema(
@@ -78,10 +88,17 @@ class EventViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin, viewsets.Ge
         event = self.get_object()
 
         if request.method.lower() == "get":
-            obj = EventReview.objects.filter(event=event, user=request.user).select_related("user").first()
+            obj = (
+                EventReview.objects.filter(event=event, user=request.user)
+                .select_related("user")
+                .first()
+            )
             if not obj:
                 return Response(status=status.HTTP_204_NO_CONTENT)
-            return Response(EventReviewSerializer(obj, context={"request": request}).data, status=status.HTTP_200_OK)
+            return Response(
+                EventReviewSerializer(obj, context={"request": request}).data,
+                status=status.HTTP_200_OK,
+            )
 
         ser = EventReviewCreateSerializer(data=request.data)
         ser.is_valid(raise_exception=True)

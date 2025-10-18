@@ -10,6 +10,7 @@ import '../features/attractions/presentation/pages/suggested_attractions_page.da
 import '../features/auth/presentation/pages/edit_profile_page.dart';
 import '../features/auth/presentation/pages/login_page.dart';
 import '../features/auth/presentation/pages/otp_page.dart';
+import '../features/bookmark/presentation/pages/bookmarks_page.dart';
 import '../features/event/presentation/pages/event_detail_page.dart';
 import '../features/event/presentation/pages/event_list_page.dart';
 import '../features/event/presentation/pages/event_review_form_page.dart';
@@ -76,6 +77,18 @@ class AppRouter {
         final args = settings.arguments;
         final int id = args is int ? args : (args is Map && args['id'] is int ? args['id'] as int : 0);
         return MaterialPageRoute(builder: (_) => AttractionDetailStyledPage(id: id));
+      }
+      case '/bookmarks': {
+        final args = settings.arguments;
+        String? baseUrl;
+        if (args is String) {
+          baseUrl = args;
+        } else if (args is Map && args['baseUrl'] is String) {
+          baseUrl = args['baseUrl'] as String;
+        }
+        return MaterialPageRoute(
+          builder: (_) => BookmarksPage(baseUrl: baseUrl),
+        );
       }
       case '/login':
         return MaterialPageRoute(builder: (_) => LoginPage());

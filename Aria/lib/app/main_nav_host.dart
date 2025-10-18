@@ -6,6 +6,8 @@ import '../features/home/presentation/pages/home_screen.dart';
 import '../features/home/presentation/pages/settings_page.dart';
 import '../shared/styles/colors.dart';
 
+import 'package:aria/features/bookmark/presentation/pages/bookmarks_page.dart';
+
 class MainNavHost extends StatefulWidget {
   final int initialIndex;
   const MainNavHost({super.key, this.initialIndex = 1});
@@ -19,16 +21,14 @@ class _MainNavHostState extends State<MainNavHost> {
   late PageController _pageController;
 
   final List<Widget> _pages = [
-
     SettingsPage(),
-    HomePage(),
-    // BookmarkPage(),
+    BookmarksPage(),
     GalleryPage(),
+    HomePage(),
   ];
 
   final List<IconData> _icons = [
     Icons.settings_outlined,
-
     Icons.bookmark_outline,
     Icons.image_outlined,
     Icons.home_outlined,
@@ -97,8 +97,7 @@ class _MainNavHostState extends State<MainNavHost> {
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceAround,
           children: List.generate(_icons.length, (index) {
-            bool isSelected = index == _selectedIndex;
-
+            final isSelected = index == _selectedIndex;
             return GestureDetector(
               onTap: () => _onNavBarTapped(index),
               child: AnimatedContainer(

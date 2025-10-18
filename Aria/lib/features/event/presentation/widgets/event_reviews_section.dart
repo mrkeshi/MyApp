@@ -75,7 +75,7 @@ class EventReviewsSection extends StatelessWidget {
               final String userName = (r.userDisplay ?? '').toString().trim();
               final String userInitial = userName.isNotEmpty ? userName.characters.first : '؟';
               final String avatarUrl = (r.profileImage ?? '').toString().trim();
-              final String dateLabel = faDigits((r.createdAt?.toLocal().toString() ?? ''));
+              final String dateLabel = faDigits((r.createdAtText?? ''));
 
               return Container(
                 margin: const EdgeInsets.only(bottom: 10),

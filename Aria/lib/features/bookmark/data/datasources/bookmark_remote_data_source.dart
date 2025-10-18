@@ -1,5 +1,6 @@
 import 'package:dio/dio.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import '../models/bookmark_dto.dart';
 
 class BookmarkRemoteDataSource {
   final Dio dio;
@@ -34,7 +35,7 @@ class BookmarkRemoteDataSource {
 
     final res = await dio.get(
       '/api/v1/bookmarks/',
-      queryParameters: {'type': type},
+      queryParameters: {'type': type, 'fields': 'id'},
       options: Options(
         headers: {'Authorization': 'Bearer $token'},
         validateStatus: (_) => true,
@@ -48,6 +49,34 @@ class BookmarkRemoteDataSource {
           .map<int>((e) => (e['id'] as num).toInt())
           .toSet();
     }
+    throw DioException(
+      requestOptions: RequestOptions(path: '/api/v1/bookmarks/'),
+      error: 'Bookmark listIds failed: ${res.statusCode}',
+      type: DioExceptionType.unknown,
+    );
+  }
+
+  Future<List<BookmarkDto>> list({required String type}) async {
+    final prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString('access_token');
+
+    final res = await dio.get(
+      '/api/v1/bookmarks/',
+      queryParameters: {'type': type},
+      options: Options(
+        headers: {'Authorization': 'Bearer $token'},
+        validateStatus: (_) => true,
+      ),
+    );
+
+    if (res.statusCode == 200 && res.data is List) {
+      final list = res.data as List;
+      return list
+          .where((e) => e is Map<String, dynamic>)
+          .map<BookmarkDto>((e) => BookmarkDto.fromJson(Map<String, dynamic>.from(e as Map)))
+          .toList();
+    }
+
     throw DioException(
       requestOptions: RequestOptions(path: '/api/v1/bookmarks/'),
       error: 'Bookmark list failed: ${res.statusCode}',

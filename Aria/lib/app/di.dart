@@ -29,6 +29,7 @@ import 'package:aria/features/bookmark/data/datasources/bookmark_remote_data_sou
 import 'package:aria/features/bookmark/data/repositories/bookmark_repository_impl.dart';
 import 'package:aria/features/bookmark/domain/repositories/bookmark_repository.dart';
 
+import '../features/bookmark/presentation/controllers/bookmark_controller.dart';
 import '../features/event/data/datasources/event_remote_data_source.dart';
 import '../features/event/data/repositories/event_repository_impl.dart';
 import '../features/event/domain/repositories/event_repository.dart';
@@ -70,7 +71,9 @@ class AppDI {
       Provider<AttractionRepository>.value(value: attractionRepo),
       Provider<BookmarkRepository>.value(value: bookmarkRepo),
       Provider<EventRepository>.value(value: eventRepo),
-
+      ChangeNotifierProvider<BookmarkController>(
+        create: (ctx) => BookmarkController(ctx.read<BookmarkRepository>()),
+      ),
       ChangeNotifierProvider<ProvinceController>(
         create: (_) => ProvinceController(provinceRepo),
       ),

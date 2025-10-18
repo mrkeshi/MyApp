@@ -52,8 +52,8 @@ class _EventInfoCardState extends State<EventInfoCard> {
     final minutes = rem.inMinutes.remainder(60);
     final venueStyle = Theme.of(context).textTheme.bodyMedium?.copyWith(
       color: Colors.white,
-      fontSize: 10.5,
-      wordSpacing: -3,
+      fontSize: 11.5,
+      wordSpacing: -2,
     );
 
     Widget unitBox(String value, String label) {

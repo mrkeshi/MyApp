@@ -6,6 +6,7 @@ class EventReview {
   final int rating;
   final String comment;
   final DateTime createdAt;
+  final String  createdAtText;
 
   const EventReview({
     required this.id,
@@ -15,5 +16,6 @@ class EventReview {
     required this.rating,
     required this.comment,
     required this.createdAt,
+    required this.createdAtText,
   });
 }

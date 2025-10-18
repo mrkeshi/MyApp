@@ -5,7 +5,6 @@ import jdatetime
 from .models import Attraction, AttractionPhoto, AttractionReview
 
 
-# --- helpers ---
 _FA_TRANS = str.maketrans("0123456789", "۰۱۲۳۴۵۶۷۸۹")
 _JALALI_MONTHS = [
     "فروردین", "اردیبهشت", "خرداد", "تیر", "مرداد", "شهریور",

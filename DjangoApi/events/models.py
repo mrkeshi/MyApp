@@ -1,12 +1,24 @@
+from datetime import timezone
+
 from django.db import models
 
 # Create your models here.
 from django.db import models
 from django.conf import settings
+from django.db.models import ExpressionWrapper, F
+from django.forms import DurationField
+
 
 def event_cover_upload_path(instance, filename):
     pid = instance.province_id or "tmp"
     return f"events/covers/{pid}/{filename}"
+
+class EventQuerySet(models.QuerySet):
+    def upcoming(self):
+        now = timezone.now()
+        return self.filter(start_at__gte=now).annotate(
+            time_left=ExpressionWrapper(F('start_at') - now, output_field=DurationField())
+        ).order_by('time_left')
 
 class Event(models.Model):
     province = models.ForeignKey("Province.Province", on_delete=models.CASCADE, related_name="event")
@@ -18,13 +30,16 @@ class Event(models.Model):
     venue = models.CharField(max_length=255)
     latitude = models.DecimalField(max_digits=9, decimal_places=6, null=True, blank=True)
     longitude = models.DecimalField(max_digits=9, decimal_places=6, null=True, blank=True)
-    cover_image = models.ImageField(upload_to=event_cover_upload_path, null=True, blank=True)
+    cover_image = models.ImageField(upload_to='event_cover_upload_path', null=True, blank=True)
     start_at = models.DateTimeField()
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
+    objects = EventQuerySet.as_manager()
+
     class Meta:
         ordering = ("start_at", "province_id")
+
 
     def __str__(self):
         return self.title
