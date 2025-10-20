@@ -87,27 +87,27 @@ class RequestCodeView(APIView):
         expires_at = now + timedelta(seconds=settings.OTP_SETTINGS["CODE_TTL_SECONDS"])
         PhoneOTP.objects.create(phone_number=phone, code=code, expires_at=expires_at)
 
-        # try:
-        #     api = KavenegarAPI(
-        #         '4A4241316876627A7A534B44723477624D487737714F785456364A75726875323235437A697172326A4B303D')
-        #     message = f"""
-        # به آریاگرد خوش آمدید
-        # کد شما: {code}
-        # لغو 11
-        # """.strip()
-        #     params = {
-        #         'sender': '2000660110',
-        #         'receptor': '09907881747',
-        #         'message': message
-        #     }
-        #
-        #     response = api.sms_send(params)
-        #     print(response)
-        #
-        # except APIException as e:
-        #     print(e)
-        # except HTTPException as e:
-        #     print(e)
+        try:
+            api = KavenegarAPI(
+                '4A4241316876627A7A534B44723477624D487737714F785456364A75726875323235437A697172326A4B303D')
+            message = f"""
+        به آریاگرد خوش آمدید
+        کد شما: {code}
+        لغو 11
+        """.strip()
+            params = {
+                'sender': '2000660110',
+                'receptor': '09907881747',
+                'message': message
+            }
+
+            response = api.sms_send(params)
+            print(response)
+
+        except APIException as e:
+            print(e)
+        except HTTPException as e:
+            print(e)
 
         print(f"Code for {phone}: {code}")
         return Response(
