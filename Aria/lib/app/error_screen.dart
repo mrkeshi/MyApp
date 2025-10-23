@@ -18,7 +18,6 @@ class ErrorScreen extends StatelessWidget {
             SizedBox(height: 20),
             ElevatedButton(
               onPressed: () {
-                // وقتی دوباره دکمه زدن، دوباره صفحه SplashScreen باز بشه
                 Navigator.pushReplacement(
                   context,
                   MaterialPageRoute(builder: (context) => SplashScreen()),

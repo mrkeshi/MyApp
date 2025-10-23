@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
-import '../../../../shared/styles/colors.dart';
 import '../../domain/entities/event_detail.dart';
 
 class EventInfoCard extends StatefulWidget {

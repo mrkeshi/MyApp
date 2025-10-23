@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-
 import '../../../../shared/styles/colors.dart';
 import '../../domain/entities/event_detail.dart';
 import '../controller/events_controller.dart';

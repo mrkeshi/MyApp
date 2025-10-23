@@ -459,11 +459,9 @@ class ShimmerBox extends StatefulWidget {
   final double radius;
 
   const ShimmerBox({Key? key, required this.width, required this.height, this.radius = 12}) : super(key: key);
-
   @override
   State<ShimmerBox> createState() => _ShimmerBoxState();
 }
-
 class _ShimmerBoxState extends State<ShimmerBox> with SingleTickerProviderStateMixin {
   late final AnimationController _ac;
 
@@ -472,13 +470,11 @@ class _ShimmerBoxState extends State<ShimmerBox> with SingleTickerProviderStateM
     super.initState();
     _ac = AnimationController(vsync: this, duration: const Duration(milliseconds: 1200))..repeat();
   }
-
   @override
   void dispose() {
     _ac.dispose();
     super.dispose();
   }
-
   @override
   Widget build(BuildContext context) {
     return AnimatedBuilder(

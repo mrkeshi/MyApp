@@ -1,6 +1,5 @@
 import 'package:dio/dio.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-
 import '../../domain/entities/attraction.dart';
 import '../../domain/entities/attraction_detail.dart';
 import '../../domain/entities/attraction_search_result.dart';

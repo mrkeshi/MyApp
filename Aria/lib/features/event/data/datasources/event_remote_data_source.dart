@@ -1,6 +1,5 @@
 import 'package:dio/dio.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-
 import '../../domain/entities/event.dart';
 import '../../domain/entities/event_detail.dart';
 import '../models/event_dto.dart';

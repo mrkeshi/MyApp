@@ -2,11 +2,9 @@ import 'package:aria/shared/styles/colors.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:provider/provider.dart';
-
 import 'package:aria/features/gallery/presentation/controllers/gallery_controller.dart';
 import 'package:aria/features/gallery/presentation/widgets/photo_tile.dart';
 import 'package:aria/features/gallery/presentation/pages/photo_viewer_page.dart';
-
 import 'package:aria/features/province/presentation/controller/province_controller.dart';
 
 class GalleryPage extends StatelessWidget {

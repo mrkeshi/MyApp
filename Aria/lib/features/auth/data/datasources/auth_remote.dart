@@ -43,7 +43,6 @@ class AuthRemoteDataSource {
     }
   }
 
-  // جهت سازگاری با کد قبلی
   Future<Map<String, dynamic>> VerifyCode(VerifyRequestCodeDto dto) async {
     return verifyCode(dto);
   }

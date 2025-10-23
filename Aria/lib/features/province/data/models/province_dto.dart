@@ -1,6 +1,5 @@
 import '../../domain/entities/province.dart';
 
-
 class ProvinceDto {
   final int id;
   final String nameFa;
@@ -10,7 +9,6 @@ class ProvinceDto {
   final String area;
   final String description;
   final String mapImage;
-
 
   const ProvinceDto({
     required this.id,
@@ -22,7 +20,6 @@ class ProvinceDto {
     required this.description,
     required this.mapImage,
   });
-
 
   factory ProvinceDto.fromJson(Map<String, dynamic> json) {
     return ProvinceDto(
@@ -37,7 +34,6 @@ class ProvinceDto {
     );
   }
 
-
   Map<String, dynamic> toJson() {
     return {
       'id': id,
@@ -50,7 +46,6 @@ class ProvinceDto {
       'map_image': mapImage,
     };
   }
-
 
   Province toEntity() {
     return Province(

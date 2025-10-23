@@ -7,8 +7,6 @@ import 'package:aria/features/auth/domain/entities/user.dart';
 import 'package:dio/dio.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:aria/features/province/domain/repositories/province_repository.dart';
-import 'package:aria/features/province/data/datasource/province_remote.dart';
-import 'package:aria/features/province/data/repositories/province_repository_impl.dart';
 import 'package:aria/core/network/dio_client.dart';
 import '../../../province/presentation/controller/province_controller.dart';
 
@@ -16,11 +14,11 @@ enum NextStep { welcome, chooseProvince, editProfile, home }
 
 class AuthController extends ChangeNotifier {
   AuthController(
-      this._repo, {
-        required ProvinceController provinceController,
-        ProvinceRepository? provinceRepo,
-      })  : _provinceController = provinceController,
-        _provinceRepo = provinceRepo;
+    this._repo, {
+    required ProvinceController provinceController,
+    ProvinceRepository? provinceRepo,
+  }) : _provinceController = provinceController,
+       _provinceRepo = provinceRepo;
 
   final AuthRepository _repo;
   final ProvinceRepository? _provinceRepo;
@@ -131,7 +129,6 @@ class AuthController extends ChangeNotifier {
     }
   }
 
-
   Future<bool> updateProfile({
     String? firstName,
     String? lastName,
@@ -200,7 +197,9 @@ class AuthController extends ChangeNotifier {
     if (!ok) return null;
     final meOk = await loadMe();
     if (!meOk || currentUser == null) return null;
-    final hasLastName = (currentUser!.lastName != null && currentUser!.lastName!.trim().isNotEmpty);
+    final hasLastName =
+        (currentUser!.lastName != null &&
+            currentUser!.lastName!.trim().isNotEmpty);
     return hasLastName ? '/home' : '/edit-profile';
   }
 
@@ -221,7 +220,7 @@ class AuthController extends ChangeNotifier {
       final u = currentUser!;
       final isProfileIncomplete =
           (u.firstName == null || u.firstName!.trim().isEmpty) ||
-              (u.lastName == null || u.lastName!.trim().isEmpty);
+          (u.lastName == null || u.lastName!.trim().isEmpty);
       if (isProfileIncomplete) return NextStep.editProfile;
       final pid = _effectiveProvinceId(u);
       if (pid == null) return NextStep.chooseProvince;
@@ -249,7 +248,9 @@ class AuthController extends ChangeNotifier {
       while (payload.length % 4 != 0) {
         payload += '=';
       }
-      final decoded = json.decode(utf8.decode(base64.decode(payload))) as Map<String, dynamic>;
+      final decoded =
+          json.decode(utf8.decode(base64.decode(payload)))
+              as Map<String, dynamic>;
       final exp = (decoded['exp'] as num?)?.toInt();
       if (exp == null) return true;
       final nowSec = DateTime.now().millisecondsSinceEpoch ~/ 1000;
@@ -259,9 +260,15 @@ class AuthController extends ChangeNotifier {
     }
   }
 
-  Future<bool> _tryRefreshWithPrefs(SharedPreferences prefs, String refreshToken) async {
+  Future<bool> _tryRefreshWithPrefs(
+    SharedPreferences prefs,
+    String refreshToken,
+  ) async {
     try {
-      final baseUrl = const String.fromEnvironment('API_BASE', defaultValue: 'http://10.0.2.2:8000');
+      final baseUrl = const String.fromEnvironment(
+        'API_BASE',
+        defaultValue: 'http://10.0.2.2:8000',
+      );
       final dio = DioClient(baseUrl: baseUrl).dio;
       final res = await dio.post(
         '/api/v1/auth/refresh/',

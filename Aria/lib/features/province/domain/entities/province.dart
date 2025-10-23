@@ -8,7 +8,6 @@ class Province {
   final String description;
   final String mapImage;
 
-
   const Province({
     required this.id,
     required this.nameFa,

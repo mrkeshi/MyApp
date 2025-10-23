@@ -1,8 +1,6 @@
 import 'package:aria/features/bookmark/domain/entities/bookmark.dart';
-
 import '../../domain/repositories/bookmark_repository.dart';
 import '../datasources/bookmark_remote_data_source.dart';
-import '../models/bookmark_dto.dart';
 
 class BookmarkRepositoryImpl implements BookmarkRepository {
   final BookmarkRemoteDataSource remote;

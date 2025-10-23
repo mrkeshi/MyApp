@@ -24,9 +24,9 @@ class AppRouter {
       case '/':
         return MaterialPageRoute(builder: (_) => SplashScreen());
       case '/home':
-        return MaterialPageRoute(builder: (_) => const MainNavHost(initialIndex: 1));
-      case '/settings':
         return MaterialPageRoute(builder: (_) => const MainNavHost(initialIndex: 0));
+      case '/settings':
+        return MaterialPageRoute(builder: (_) => const MainNavHost(initialIndex: 1));
       case '/bookmark':
         return MaterialPageRoute(builder: (_) => const MainNavHost(initialIndex: 2));
       case '/gallery':

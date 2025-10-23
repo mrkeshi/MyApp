@@ -67,7 +67,7 @@ class SettingsPage extends StatelessWidget {
         ),
       ),
 
-      // منوی پایین: TODO
+
       bottomNavigationBar: _BottomBarTodo(primary: primary),
     );
   }

@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:provider/provider.dart';
 import 'package:aria/shared/styles/colors.dart';
-
 import '../../../province/presentation/controller/province_controller.dart';
 import '../controller/events_controller.dart';
 import '../../domain/entities/event.dart';

@@ -54,7 +54,6 @@ class _EventHeaderCardState extends State<EventHeaderCard> {
           width: double.infinity,
           child: Stack(
             children: [
-              // تصویر کاور
               ClipRRect(
                 borderRadius: BorderRadius.circular(16),
                 child: AspectRatio(

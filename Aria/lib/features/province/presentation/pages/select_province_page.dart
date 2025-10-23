@@ -118,7 +118,7 @@ class _IranMapScreenState extends State<IranMapScreen> {
     for (var entry in provincePaths.entries) {
       if (entry.value.contains(tappedPoint)) {
         setState(() {
-          selectedId = entry.key; // مثل "IR-2"
+          selectedId = entry.key;
         });
         break;
       }

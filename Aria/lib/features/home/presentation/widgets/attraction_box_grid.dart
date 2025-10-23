@@ -1,8 +1,6 @@
-import 'dart:math' as math;
 import 'package:aria/shared/styles/colors.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-
 import '../../../auth/presentation/controllers/auth_controller.dart';
 
 class AttractionBoxGrid extends StatelessWidget {

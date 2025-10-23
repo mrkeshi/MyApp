@@ -1,9 +1,6 @@
-// lib/features/event/presentation/controller/events_controller.dart
 import 'package:flutter/foundation.dart';
 import 'package:dio/dio.dart';
-
 import 'package:aria/features/bookmark/domain/repositories/bookmark_repository.dart';
-
 import '../../domain/entities/event.dart';
 import '../../domain/entities/event_detail.dart';
 import '../../domain/repositories/event_repository.dart';

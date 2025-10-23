@@ -121,13 +121,11 @@ class _AnimatedCircleAvatarState extends State<AnimatedCircleAvatar>
       CurvedAnimation(parent: _controller, curve: Curves.easeInOut),
     );
   }
-
   @override
   void dispose() {
     _controller.dispose();
     super.dispose();
   }
-
   @override
   Widget build(BuildContext context) {
     return Container(

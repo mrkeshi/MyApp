@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:aria/shared/styles/colors.dart';
-
 import '../../../../shared/widgets/primary_button.dart';
 
 class OnboardingScreen extends StatelessWidget {
