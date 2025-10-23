@@ -2,9 +2,17 @@ from pathlib import Path
 import os
 from datetime import timedelta
 from urllib.parse import urlparse
+from dotenv import load_dotenv
 
+# ───────────────────────────────────────────────────────────────────────────────
+# Paths & .env
+# ───────────────────────────────────────────────────────────────────────────────
 BASE_DIR = Path(__file__).resolve().parent.parent
+load_dotenv(BASE_DIR / ".env")
 
+# ───────────────────────────────────────────────────────────────────────────────
+# Helper: env()
+# ───────────────────────────────────────────────────────────────────────────────
 def env(key, default=None, cast=str):
     val = os.getenv(key, default)
     if val is None:
@@ -18,7 +26,9 @@ def env(key, default=None, cast=str):
             return default
     return val
 
-# ---------- Defaults tuned for LOCAL development (no .env needed) ----------
+# ───────────────────────────────────────────────────────────────────────────────
+# Core
+# ───────────────────────────────────────────────────────────────────────────────
 SECRET_KEY = env("DJANGO_SECRET_KEY", "dev-only-secret-key-change-for-prod")
 DEBUG = env("DJANGO_DEBUG", True, bool)
 
@@ -35,6 +45,9 @@ CSRF_TRUSTED_ORIGINS = [o.strip() for o in env(
 USE_X_FORWARDED_HOST = env("DJANGO_USE_X_FORWARDED_HOST", False, bool)
 SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https") if env("DJANGO_HTTPS_BEHIND_PROXY", False, bool) else None
 
+# ───────────────────────────────────────────────────────────────────────────────
+# Apps & Middleware
+# ───────────────────────────────────────────────────────────────────────────────
 INSTALLED_APPS = [
     "django.contrib.admin",
     "django.contrib.auth",
@@ -57,7 +70,7 @@ AUTH_USER_MODEL = "accounts.User"
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
     "corsheaders.middleware.CorsMiddleware",
-    # Whitenoise only in production (added below if not DEBUG)
+    # بدون WhiteNoise (استاتیک را Nginx سرو می‌کند)
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
@@ -65,10 +78,6 @@ MIDDLEWARE = [
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
-
-# Add Whitenoise only when DEBUG is False
-if not DEBUG:
-    MIDDLEWARE.insert(2, "whitenoise.middleware.WhiteNoiseMiddleware")
 
 ROOT_URLCONF = "DjangoApi.urls"
 
@@ -89,7 +98,9 @@ TEMPLATES = [
 
 WSGI_APPLICATION = "DjangoApi.wsgi.application"
 
-# Database: default SQLite for local; overrides via DATABASE_URL
+# ───────────────────────────────────────────────────────────────────────────────
+# Database
+# ───────────────────────────────────────────────────────────────────────────────
 DATABASE_URL = env("DATABASE_URL", "")
 if DATABASE_URL:
     u = urlparse(DATABASE_URL)
@@ -122,6 +133,9 @@ else:
         }
     }
 
+# ───────────────────────────────────────────────────────────────────────────────
+# Auth
+# ───────────────────────────────────────────────────────────────────────────────
 AUTH_PASSWORD_VALIDATORS = [
     {"NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator"},
     {"NAME": "django.contrib.auth.password_validation.MinimumLengthValidator"},
@@ -129,26 +143,31 @@ AUTH_PASSWORD_VALIDATORS = [
     {"NAME": "django.contrib.auth.password_validation.NumericPasswordValidator"},
 ]
 
+# ───────────────────────────────────────────────────────────────────────────────
+# i18n / tz
+# ───────────────────────────────────────────────────────────────────────────────
 LANGUAGE_CODE = "en-us"
 TIME_ZONE = "Asia/Tehran"
 USE_I18N = True
 USE_TZ = True
 
+# ───────────────────────────────────────────────────────────────────────────────
+# Static & Media (بدون WhiteNoise)
+# ───────────────────────────────────────────────────────────────────────────────
 STATIC_URL = "/static/"
 STATIC_ROOT = BASE_DIR / "staticfiles"
+
 MEDIA_URL = "/media/"
 MEDIA_ROOT = BASE_DIR / "media"
 
-# Storage backends: plain in DEBUG, Whitenoise in production
 STORAGES = {
     "default": {"BACKEND": "django.core.files.storage.FileSystemStorage"},
-    "staticfiles": {
-        "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage"
-    } if not DEBUG else {
-        "BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage"
-    },
+    "staticfiles": {"BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage"},
 }
 
+# ───────────────────────────────────────────────────────────────────────────────
+# DRF / JWT / Schema
+# ───────────────────────────────────────────────────────────────────────────────
 REST_FRAMEWORK = {
     "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
     "DEFAULT_AUTHENTICATION_CLASSES": [
@@ -192,7 +211,9 @@ SPECTACULAR_SETTINGS = {
 
 API_BASE_URL = "api/v1/"
 
-# CORS/CSRF defaults for local
+# ───────────────────────────────────────────────────────────────────────────────
+# CORS / CSRF
+# ───────────────────────────────────────────────────────────────────────────────
 CORS_ALLOW_ALL_ORIGINS = env("CORS_ALLOW_ALL_ORIGINS", True, bool)
 CORS_ALLOWED_ORIGINS = [o.strip() for o in env("CORS_ALLOWED_ORIGINS", "").split(",") if o.strip()]
 CORS_ALLOW_CREDENTIALS = env("CORS_ALLOW_CREDENTIALS", False, bool)
@@ -209,6 +230,9 @@ X_FRAME_OPTIONS = "DENY"
 CSRF_COOKIE_HTTPONLY = True
 SESSION_COOKIE_HTTPONLY = True
 
+# ───────────────────────────────────────────────────────────────────────────────
+# Logging
+# ───────────────────────────────────────────────────────────────────────────────
 LOG_LEVEL = env("DJANGO_LOG_LEVEL", "INFO")
 LOGGING = {
     "version": 1,
@@ -222,9 +246,13 @@ LOGGING = {
     "root": {"handlers": ["console"], "level": LOG_LEVEL},
 }
 
+# ───────────────────────────────────────────────────────────────────────────────
+# Misc
+# ───────────────────────────────────────────────────────────────────────────────
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+
 OTP_SETTINGS = {
     "CODE_TTL_SECONDS": 180,
     "RESEND_WINDOW_SECONDS": 60,
-    "MAX_REQUESTS_PER_HOUR": 5,   
+    "MAX_REQUESTS_PER_HOUR": 5,
 }
