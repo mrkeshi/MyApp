@@ -2,11 +2,8 @@ import 'dart:async';
 import 'dart:convert';
 import 'package:aria/app/theme.dart';
 import 'package:aria/shared/styles/colors.dart';
-import 'package:aria/core/network/dio_client.dart'; //
-import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:internet_connection_checker_plus/internet_connection_checker_plus.dart';
 
 import '../features/auth/presentation/controllers/auth_controller.dart';

@@ -24,13 +24,13 @@ class AppRouter {
       case '/':
         return MaterialPageRoute(builder: (_) => SplashScreen());
       case '/home':
-        return MaterialPageRoute(builder: (_) => const MainNavHost(initialIndex: 0));
+        return MaterialPageRoute(builder: (_) => const MainNavHost(initialIndex:3));
       case '/settings':
-        return MaterialPageRoute(builder: (_) => const MainNavHost(initialIndex: 1));
+        return MaterialPageRoute(builder: (_) => const MainNavHost(initialIndex: 0));
       case '/bookmark':
-        return MaterialPageRoute(builder: (_) => const MainNavHost(initialIndex: 2));
+        return MaterialPageRoute(builder: (_) => const MainNavHost(initialIndex: 1));
       case '/gallery':
-        return MaterialPageRoute(builder: (_) => const MainNavHost(initialIndex: 3));
+        return MaterialPageRoute(builder: (_) => const MainNavHost(initialIndex: 2));
       case '/welcome':
         return MaterialPageRoute(builder: (_) => OnboardingScreen());
       case '/edit-profile':

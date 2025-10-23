@@ -38,7 +38,7 @@ import '../features/event/presentation/controller/events_controller.dart';
 class AppDI {
   static DioClient buildDioClient() {
     const baseUrl =
-    String.fromEnvironment('API_BASE', defaultValue: 'http://10.0.2.2:8000');
+    String.fromEnvironment('API_BASE', defaultValue: 'https://aria.penvis.ir/');
     return DioClient(baseUrl: baseUrl);
   }
 

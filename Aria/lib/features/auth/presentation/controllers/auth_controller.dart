@@ -267,7 +267,7 @@ class AuthController extends ChangeNotifier {
     try {
       final baseUrl = const String.fromEnvironment(
         'API_BASE',
-        defaultValue: 'http://10.0.2.2:8000',
+        defaultValue: 'https://aria.penvis.ir',
       );
       final dio = DioClient(baseUrl: baseUrl).dio;
       final res = await dio.post(

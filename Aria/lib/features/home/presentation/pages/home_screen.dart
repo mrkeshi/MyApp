@@ -31,7 +31,7 @@ class HomePage extends StatelessWidget {
                   child: AttractionSlider(),
                 ),
               ),
-              const SizedBox(height: 0),
+              const SizedBox(height: 4),
               Transform.translate(
                 offset: const Offset(0, -6),
                 child: const Padding(

@@ -10,7 +10,7 @@ import 'package:aria/features/bookmark/presentation/pages/bookmarks_page.dart';
 
 class MainNavHost extends StatefulWidget {
   final int initialIndex;
-  const MainNavHost({super.key, this.initialIndex = 0});
+  const MainNavHost({super.key, this.initialIndex = 3});
 
   @override
   State<MainNavHost> createState() => _MainNavHostState();

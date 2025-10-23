@@ -148,7 +148,7 @@ class _ThumbImageState extends State<_ThumbImage> {
   String _abs(String url) {
     if (url.isEmpty) return url;
     if (url.startsWith('http://') || url.startsWith('https://')) return url;
-    final base = widget.baseUrl?.trim().replaceAll(RegExp(r'/$'), '') ?? 'http://10.0.2.2:8000';
+    final base = widget.baseUrl?.trim().replaceAll(RegExp(r'/$'), '') ?? 'https://aria.penvis.ir';
     final path = url.trim().startsWith('/') ? url.trim() : '/${url.trim()}';
     return '$base$path';
   }
