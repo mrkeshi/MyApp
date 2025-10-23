@@ -16,7 +16,7 @@ env/
 .env.*
 
 # Django media/static
-media/
+
 staticfiles/
 static/
 
