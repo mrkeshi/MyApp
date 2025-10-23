@@ -101,37 +101,12 @@ WSGI_APPLICATION = "DjangoApi.wsgi.application"
 # ───────────────────────────────────────────────────────────────────────────────
 # Database
 # ───────────────────────────────────────────────────────────────────────────────
-DATABASE_URL = env("DATABASE_URL", "")
-if DATABASE_URL:
-    u = urlparse(DATABASE_URL)
-    if u.scheme.startswith("postgres"):
-        ENGINE = "django.db.backends.postgresql"
-    elif u.scheme.startswith("mysql"):
-        ENGINE = "django.db.backends.mysql"
-    elif u.scheme.startswith("sqlite"):
-        ENGINE = "django.db.backends.sqlite3"
-    else:
-        ENGINE = "django.db.backends.postgresql"
-
-    DATABASES = {
-        "default": {
-            "ENGINE": ENGINE,
-            "NAME": u.path.lstrip("/") or BASE_DIR / "db.sqlite3",
-            "USER": u.username or "",
-            "PASSWORD": u.password or "",
-            "HOST": u.hostname or "",
-            "PORT": u.port or "",
-            "CONN_MAX_AGE": env("DB_CONN_MAX_AGE", 60, int),
-            "ATOMIC_REQUESTS": True,
-        }
+DATABASES = {
+    "default": {
+        "ENGINE": "django.db.backends.sqlite3",
+        "NAME": BASE_DIR / "db.sqlite3",
     }
-else:
-    DATABASES = {
-        "default": {
-            "ENGINE": "django.db.backends.sqlite3",
-            "NAME": BASE_DIR / "db.sqlite3",
-        }
-    }
+}
 
 # ───────────────────────────────────────────────────────────────────────────────
 # Auth
